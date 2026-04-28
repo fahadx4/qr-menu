@@ -20,20 +20,38 @@ export const mockMenus: Menu[] = [
   },
 ];
 
-export const mockCategories: Category[] = [
-  { id: "c1", menu_id: "m1", tenant_id: "t1", name: "Burgers",   is_active: true, sort_order: 1 },
-  { id: "c2", menu_id: "m1", tenant_id: "t1", name: "Sides",     is_active: true, sort_order: 2 },
-  { id: "c3", menu_id: "m1", tenant_id: "t1", name: "Drinks",    is_active: true, sort_order: 3 },
-  { id: "c4", menu_id: "m1", tenant_id: "t1", name: "Desserts",  is_active: true, sort_order: 4 },
+export const mockCategories: (Category & { translations?: Record<string, { name: string; description?: string }> })[] = [
+  {
+    id: "c1", menu_id: "m1", tenant_id: "t1", name: "Burgers", is_active: true, sort_order: 1,
+    translations: { ar: { name: "برغر" } },
+  },
+  {
+    id: "c2", menu_id: "m1", tenant_id: "t1", name: "Sides", is_active: true, sort_order: 2,
+    translations: { ar: { name: "مقبلات جانبية" } },
+  },
+  {
+    id: "c3", menu_id: "m1", tenant_id: "t1", name: "Drinks", is_active: true, sort_order: 3,
+    translations: { ar: { name: "مشروبات" } },
+  },
+  {
+    id: "c4", menu_id: "m1", tenant_id: "t1", name: "Desserts", is_active: true, sort_order: 4,
+    translations: { ar: { name: "حلويات" } },
+  },
 ];
 
-export const mockItems: Item[] = [
+export const mockItems: (Item & { translations?: Record<string, { name: string; description?: string }> })[] = [
   {
     id: "i1",
     category_id: "c1",
     tenant_id: "t1",
     name: "Classic Smash Burger",
     description: "Double smash patty, American cheese, caramelized onions, pickles, special sauce on a brioche bun.",
+    translations: {
+      ar: {
+        name: "برغر سماش كلاسيكي",
+        description: "باتي مضغوط مزدوج، جبن أمريكي، بصل مكرمل، مخللات، صلصة خاصة على خبز البريوش.",
+      },
+    },
     price: 1299,
     prep_time: 10,
     calories: 680,
@@ -54,6 +72,12 @@ export const mockItems: Item[] = [
     tenant_id: "t1",
     name: "Crispy Chicken Burger",
     description: "Southern-fried crispy chicken breast, coleslaw, pickled jalapeños, honey mustard.",
+    translations: {
+      ar: {
+        name: "برغر دجاج مقرمش",
+        description: "صدر دجاج مقلي مقرمش، كول سلو، هالابينو مخلل، خردل بالعسل.",
+      },
+    },
     price: 1199,
     prep_time: 12,
     calories: 720,
@@ -73,6 +97,12 @@ export const mockItems: Item[] = [
     tenant_id: "t1",
     name: "Vegan Beyond Burger",
     description: "Beyond Meat patty, vegan cheddar, lettuce, tomato, vegan mayo on a whole-wheat bun.",
+    translations: {
+      ar: {
+        name: "برغر نباتي بيوند",
+        description: "باتي Beyond Meat، جبن شيدر نباتي، خس، طماطم، مايونيز نباتي على خبز القمح الكامل.",
+      },
+    },
     price: 1399,
     prep_time: 10,
     calories: 590,
@@ -92,6 +122,12 @@ export const mockItems: Item[] = [
     tenant_id: "t1",
     name: "Crispy Fries",
     description: "Hand-cut russet potatoes, double-fried, seasoned with sea salt.",
+    translations: {
+      ar: {
+        name: "بطاطس مقلية مقرمشة",
+        description: "بطاطس مقطعة يدوياً، مقلية مرتين، متبلة بملح البحر.",
+      },
+    },
     price: 499,
     prep_time: 6,
     calories: 380,
@@ -111,6 +147,12 @@ export const mockItems: Item[] = [
     tenant_id: "t1",
     name: "Onion Rings",
     description: "Beer-battered onion rings, golden and crispy.",
+    translations: {
+      ar: {
+        name: "حلقات البصل",
+        description: "حلقات بصل بعجينة البيرة، ذهبية ومقرمشة.",
+      },
+    },
     price: 549,
     prep_time: 7,
     calories: 420,
@@ -130,6 +172,12 @@ export const mockItems: Item[] = [
     tenant_id: "t1",
     name: "Classic Milkshake",
     description: "Thick and creamy milkshake — chocolate, vanilla, or strawberry.",
+    translations: {
+      ar: {
+        name: "ميلك شيك كلاسيكي",
+        description: "ميلك شيك كثيف وكريمي — شوكولاتة، فانيليا، أو فراولة.",
+      },
+    },
     price: 699,
     prep_time: 5,
     calories: 520,
@@ -149,6 +197,12 @@ export const mockItems: Item[] = [
     tenant_id: "t1",
     name: "Fresh Lemonade",
     description: "Hand-squeezed lemonade with fresh mint.",
+    translations: {
+      ar: {
+        name: "عصير ليمون طازج",
+        description: "عصير ليمون طازج مع نعناع طازج.",
+      },
+    },
     price: 399,
     prep_time: 3,
     calories: 120,
@@ -168,6 +222,12 @@ export const mockItems: Item[] = [
     tenant_id: "t1",
     name: "Loaded Brownie",
     description: "Warm fudge brownie with vanilla ice cream, hot fudge, and crushed nuts.",
+    translations: {
+      ar: {
+        name: "براوني محمل",
+        description: "براوني دافئ بالفدج مع آيس كريم الفانيليا، فدج ساخن، ومكسرات مجروشة.",
+      },
+    },
     price: 799,
     prep_time: 5,
     calories: 650,
@@ -183,35 +243,37 @@ export const mockItems: Item[] = [
   },
 ];
 
-export const mockModifierGroups: Record<string, ModifierGroup[]> = {
+export const mockModifierGroups: Record<string, (ModifierGroup & { translations?: Record<string, { name: string }> })[]> = {
   i1: [
     {
       id: "mg1",
       item_id: "i1",
       name: "Size",
+      translations: { ar: { name: "الحجم" } },
       is_required: true,
       min_selections: 1,
       max_selections: 1,
       sort_order: 1,
       options: [
-        { id: "mo1", group_id: "mg1", name: "Regular",  price_delta: 0,   is_default: true,  is_available: true, sort_order: 1 },
-        { id: "mo2", group_id: "mg1", name: "Large",    price_delta: 200, is_default: false, is_available: true, sort_order: 2 },
-        { id: "mo3", group_id: "mg1", name: "XL Double",price_delta: 400, is_default: false, is_available: true, sort_order: 3 },
+        { id: "mo1", group_id: "mg1", name: "Regular",   price_delta: 0,   is_default: true,  is_available: true, sort_order: 1 },
+        { id: "mo2", group_id: "mg1", name: "Large",     price_delta: 200, is_default: false, is_available: true, sort_order: 2 },
+        { id: "mo3", group_id: "mg1", name: "XL Double", price_delta: 400, is_default: false, is_available: true, sort_order: 3 },
       ],
     },
     {
       id: "mg2",
       item_id: "i1",
       name: "Extra Toppings",
+      translations: { ar: { name: "إضافات" } },
       is_required: false,
       min_selections: 0,
       max_selections: 4,
       sort_order: 2,
       options: [
-        { id: "mo4", group_id: "mg2", name: "Extra Cheese",  price_delta: 100, is_default: false, is_available: true, sort_order: 1 },
-        { id: "mo5", group_id: "mg2", name: "Bacon",         price_delta: 150, is_default: false, is_available: true, sort_order: 2 },
-        { id: "mo6", group_id: "mg2", name: "Avocado",       price_delta: 150, is_default: false, is_available: true, sort_order: 3 },
-        { id: "mo7", group_id: "mg2", name: "Fried Egg",     price_delta: 100, is_default: false, is_available: true, sort_order: 4 },
+        { id: "mo4", group_id: "mg2", name: "Extra Cheese", price_delta: 100, is_default: false, is_available: true, sort_order: 1 },
+        { id: "mo5", group_id: "mg2", name: "Bacon",        price_delta: 150, is_default: false, is_available: true, sort_order: 2 },
+        { id: "mo6", group_id: "mg2", name: "Avocado",      price_delta: 150, is_default: false, is_available: true, sort_order: 3 },
+        { id: "mo7", group_id: "mg2", name: "Fried Egg",    price_delta: 100, is_default: false, is_available: true, sort_order: 4 },
       ],
     },
   ],
@@ -220,14 +282,15 @@ export const mockModifierGroups: Record<string, ModifierGroup[]> = {
       id: "mg3",
       item_id: "i6",
       name: "Flavor",
+      translations: { ar: { name: "النكهة" } },
       is_required: true,
       min_selections: 1,
       max_selections: 1,
       sort_order: 1,
       options: [
-        { id: "mo8",  group_id: "mg3", name: "Chocolate", price_delta: 0, is_default: true,  is_available: true, sort_order: 1 },
-        { id: "mo9",  group_id: "mg3", name: "Vanilla",   price_delta: 0, is_default: false, is_available: true, sort_order: 2 },
-        { id: "mo10", group_id: "mg3", name: "Strawberry",price_delta: 0, is_default: false, is_available: true, sort_order: 3 },
+        { id: "mo8",  group_id: "mg3", name: "Chocolate", price_delta: 0,   is_default: true,  is_available: true, sort_order: 1 },
+        { id: "mo9",  group_id: "mg3", name: "Vanilla",   price_delta: 0,   is_default: false, is_available: true, sort_order: 2 },
+        { id: "mo10", group_id: "mg3", name: "Strawberry",price_delta: 0,   is_default: false, is_available: true, sort_order: 3 },
         { id: "mo11", group_id: "mg3", name: "Oreo",      price_delta: 100, is_default: false, is_available: true, sort_order: 4 },
       ],
     },
