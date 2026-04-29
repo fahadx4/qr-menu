@@ -3,6 +3,7 @@
 import { Bell, Menu, LogOut, User, Settings, ChevronDown, Globe } from "lucide-react";
 import { useDashboardStore } from "@/store/dashboard";
 import { useLanguageStore } from "@/store/language";
+import { useT } from "@/lib/i18n";
 import { mockTenant, mockBranches } from "@/mock/tenant";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const { currentBranchId, setBranch } = useDashboardStore();
   const { lang, setLang } = useLanguageStore();
+  const t = useT();
   const currentBranch = mockBranches.find((b) => b.id === currentBranchId) ?? mockBranches[0];
 
   return (
@@ -47,7 +49,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-52">
           <DropdownMenuGroup>
-            <DropdownMenuLabel>Branches</DropdownMenuLabel>
+            <DropdownMenuLabel>{t.headerBranchesLabel}</DropdownMenuLabel>
             {mockBranches.map((branch) => (
               <DropdownMenuItem
                 key={branch.id}
@@ -55,12 +57,12 @@ export function Header({ onMenuClick }: HeaderProps) {
                 className={cn(currentBranchId === branch.id && "font-medium")}
               >
                 <span className={cn(
-                  "mr-2 h-2 w-2 rounded-full flex-shrink-0",
+                  "me-2 h-2 w-2 rounded-full flex-shrink-0",
                   branch.is_active ? "bg-green-500" : "bg-muted-foreground/40"
                 )} />
                 <span className="flex-1 truncate">{branch.name}</span>
                 {branch.is_default && (
-                  <span className="text-[10px] text-muted-foreground">Default</span>
+                  <span className="text-[10px] text-muted-foreground">{t.headerDefaultBadge}</span>
                 )}
               </DropdownMenuItem>
             ))}
@@ -84,13 +86,13 @@ export function Header({ onMenuClick }: HeaderProps) {
       <DropdownMenu>
         <DropdownMenuTrigger className="relative flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <Bell className="h-4 w-4" />
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+          <span className="absolute -top-0.5 -end-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
             3
           </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-72">
           <DropdownMenuGroup>
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuLabel>{t.headerNotificationsLabel}</DropdownMenuLabel>
             {[
               { title: "New order #1042", time: "2m ago", dot: "bg-blue-500" },
               { title: "Table 4 — Call waiter", time: "5m ago", dot: "bg-yellow-500" },
@@ -107,7 +109,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="justify-center text-xs text-muted-foreground">
-            View all notifications
+            {t.headerViewAllNotif}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -133,19 +135,19 @@ export function Header({ onMenuClick }: HeaderProps) {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Profile
+              <User className="me-2 h-4 w-4" />
+              {t.headerProfileLabel}
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
+              <Settings className="me-2 h-4 w-4" />
+              {t.navSettings}
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem variant="destructive">
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign out
+              <LogOut className="me-2 h-4 w-4" />
+              {t.headerSignOut}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

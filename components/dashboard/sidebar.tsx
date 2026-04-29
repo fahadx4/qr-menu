@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDashboardStore } from "@/store/dashboard";
+import { useT } from "@/lib/i18n";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { UserRole } from "@/types";
 
@@ -27,67 +28,69 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const NAV: NavGroup[] = [
-  {
-    label: null,
-    items: [
-      { label: "Overview",  href: "/dashboard",          icon: LayoutDashboard, roles: ["owner", "manager"] },
-      { label: "Orders",    href: "/dashboard/orders",   icon: ShoppingBag,     roles: ["owner", "manager", "cashier", "waiter", "read_only"] },
-      { label: "Kitchen",   href: "/dashboard/kds",      icon: ChefHat,         roles: ["owner", "manager", "kitchen"] },
-    ],
-  },
-  {
-    label: "Menu & Commerce",
-    items: [
-      { label: "Menu",        href: "/dashboard/menu",            icon: UtensilsCrossed, roles: ["owner", "manager"] },
-      { label: "Translator",  href: "/dashboard/menu/translator", icon: Languages,       roles: ["owner", "manager"] },
-      { label: "QR Codes",    href: "/dashboard/qr",              icon: QrCode,          roles: ["owner", "manager"] },
-      { label: "Tables",      href: "/dashboard/tables",          icon: LayoutGrid,      roles: ["owner", "manager", "waiter"] },
-      { label: "Reservations",href: "/dashboard/reservations",    icon: CalendarClock,   roles: ["owner", "manager", "waiter"] },
-      { label: "Inventory",   href: "/dashboard/inventory",       icon: Package,         roles: ["owner", "manager"] },
-      { label: "Delivery",    href: "/dashboard/delivery",        icon: Truck,           roles: ["owner", "manager"] },
-    ],
-  },
-  {
-    label: "People",
-    items: [
-      { label: "Staff",      href: "/dashboard/staff",     icon: Users,      roles: ["owner", "manager"] },
-      { label: "Customers",  href: "/dashboard/customers", icon: UserCheck,  roles: ["owner", "manager"] },
-    ],
-  },
-  {
-    label: "Marketing",
-    items: [
-      { label: "Loyalty",     href: "/dashboard/loyalty",     icon: Gift,      roles: ["owner", "manager"] },
-      { label: "Promotions",  href: "/dashboard/promotions",  icon: Megaphone, roles: ["owner", "manager"] },
-    ],
-  },
-  {
-    label: "Insights",
-    items: [
-      { label: "Analytics",   href: "/dashboard/analytics",        icon: BarChart2,    roles: ["owner", "manager"] },
-      { label: "WA Settings", href: "/dashboard/whatsapp",          icon: MessageCircle, roles: ["owner", "manager"] },
-      { label: "WA Inbox",    href: "/dashboard/whatsapp/inbox",    icon: Inbox,         roles: ["owner", "manager", "waiter"] },
-    ],
-  },
-  {
-    label: "Platform",
-    items: [
-      { label: "Integrations", href: "/dashboard/integrations", icon: Plug,   roles: ["owner", "manager"] },
-      { label: "Franchise",    href: "/dashboard/franchise",    icon: Globe2,  roles: ["owner"] },
-    ],
-  },
-  {
-    label: "Config",
-    items: [
-      { label: "Website",  href: "/dashboard/website",            icon: Globe,     roles: ["owner", "manager"] },
-      { label: "Branches", href: "/dashboard/branches",           icon: Building2, roles: ["owner", "manager"] },
-      { label: "Settings", href: "/dashboard/settings",           icon: Settings,  roles: ["owner", "manager"] },
-      { label: "Printers", href: "/dashboard/settings/printers",  icon: Printer,   roles: ["owner", "manager"] },
-      { label: "Billing",  href: "/dashboard/billing",            icon: CreditCard, roles: ["owner"] },
-    ],
-  },
-];
+function getNav(t: ReturnType<typeof useT>): NavGroup[] {
+  return [
+    {
+      label: null,
+      items: [
+        { label: t.navOverview, href: "/dashboard",          icon: LayoutDashboard, roles: ["owner", "manager"] },
+        { label: t.navOrders,   href: "/dashboard/orders",   icon: ShoppingBag,     roles: ["owner", "manager", "cashier", "waiter", "read_only"] },
+        { label: t.navKitchen,  href: "/dashboard/kds",      icon: ChefHat,         roles: ["owner", "manager", "kitchen"] },
+      ],
+    },
+    {
+      label: t.navGroupMenuCommerce,
+      items: [
+        { label: t.navMenu,         href: "/dashboard/menu",            icon: UtensilsCrossed, roles: ["owner", "manager"] },
+        { label: t.navTranslator,   href: "/dashboard/menu/translator", icon: Languages,       roles: ["owner", "manager"] },
+        { label: t.navQrCodes,      href: "/dashboard/qr",              icon: QrCode,          roles: ["owner", "manager"] },
+        { label: t.navTables,       href: "/dashboard/tables",          icon: LayoutGrid,      roles: ["owner", "manager", "waiter"] },
+        { label: t.navReservations, href: "/dashboard/reservations",    icon: CalendarClock,   roles: ["owner", "manager", "waiter"] },
+        { label: t.navInventory,    href: "/dashboard/inventory",       icon: Package,         roles: ["owner", "manager"] },
+        { label: t.navDelivery,     href: "/dashboard/delivery",        icon: Truck,           roles: ["owner", "manager"] },
+      ],
+    },
+    {
+      label: t.navGroupPeople,
+      items: [
+        { label: t.navStaff,     href: "/dashboard/staff",     icon: Users,     roles: ["owner", "manager"] },
+        { label: t.navCustomers, href: "/dashboard/customers", icon: UserCheck, roles: ["owner", "manager"] },
+      ],
+    },
+    {
+      label: t.navGroupMarketing,
+      items: [
+        { label: t.navLoyalty,    href: "/dashboard/loyalty",    icon: Gift,      roles: ["owner", "manager"] },
+        { label: t.navPromotions, href: "/dashboard/promotions", icon: Megaphone, roles: ["owner", "manager"] },
+      ],
+    },
+    {
+      label: t.navGroupInsights,
+      items: [
+        { label: t.navAnalytics,        href: "/dashboard/analytics",       icon: BarChart2,     roles: ["owner", "manager"] },
+        { label: t.navWhatsappSettings, href: "/dashboard/whatsapp",        icon: MessageCircle, roles: ["owner", "manager"] },
+        { label: t.navWhatsappInbox,    href: "/dashboard/whatsapp/inbox",  icon: Inbox,         roles: ["owner", "manager", "waiter"] },
+      ],
+    },
+    {
+      label: t.navGroupPlatform,
+      items: [
+        { label: t.navIntegrations, href: "/dashboard/integrations", icon: Plug,  roles: ["owner", "manager"] },
+        { label: t.navFranchise,    href: "/dashboard/franchise",    icon: Globe2, roles: ["owner"] },
+      ],
+    },
+    {
+      label: t.navGroupConfig,
+      items: [
+        { label: t.navWebsite,  href: "/dashboard/website",           icon: Globe,      roles: ["owner", "manager"] },
+        { label: t.navBranches, href: "/dashboard/branches",          icon: Building2,  roles: ["owner", "manager"] },
+        { label: t.navSettings, href: "/dashboard/settings",          icon: Settings,   roles: ["owner", "manager"] },
+        { label: t.navPrinters, href: "/dashboard/settings/printers", icon: Printer,    roles: ["owner", "manager"] },
+        { label: t.navBilling,  href: "/dashboard/billing",           icon: CreditCard, roles: ["owner"] },
+      ],
+    },
+  ];
+}
 
 // ─── NavItem ──────────────────────────────────────────────────────────────────
 
@@ -123,7 +126,7 @@ function NavLink({
       <Icon className={cn("h-4 w-4 flex-shrink-0", isActive && "text-sidebar-primary")} />
       {!collapsed && <span>{item.label}</span>}
       {!collapsed && isActive && (
-        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
+        <span className="ms-auto h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
       )}
     </Link>
   );
@@ -148,6 +151,8 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed = false, isMobile = false, onClose }: SidebarProps) {
   const { currentRole, sidebarCollapsed, toggleSidebar } = useDashboardStore();
+  const t = useT();
+  const NAV = getNav(t);
 
   const isCollapsed = isMobile ? false : collapsed || sidebarCollapsed;
 
@@ -184,8 +189,8 @@ export function Sidebar({ collapsed = false, isMobile = false, onClose }: Sideba
             className="hidden lg:flex rounded-md p-1 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
           >
             {isCollapsed
-              ? <ChevronRight className="h-4 w-4" />
-              : <ChevronLeft className="h-4 w-4" />
+              ? <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+              : <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
             }
           </button>
         )}
