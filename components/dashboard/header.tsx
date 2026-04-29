@@ -1,7 +1,8 @@
 "use client";
 
-import { Bell, Menu, LogOut, User, Settings, ChevronDown } from "lucide-react";
+import { Bell, Menu, LogOut, User, Settings, ChevronDown, Globe } from "lucide-react";
 import { useDashboardStore } from "@/store/dashboard";
+import { useLanguageStore } from "@/store/language";
 import { mockTenant, mockBranches } from "@/mock/tenant";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +22,7 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const { currentBranchId, setBranch } = useDashboardStore();
+  const { lang, setLang } = useLanguageStore();
   const currentBranch = mockBranches.find((b) => b.id === currentBranchId) ?? mockBranches[0];
 
   return (
@@ -67,6 +69,16 @@ export function Header({ onMenuClick }: HeaderProps) {
       </DropdownMenu>
 
       <div className="flex-1" />
+
+      {/* Language toggle */}
+      <button
+        onClick={() => setLang(lang === "en" ? "ar" : "en")}
+        className="relative flex h-8 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-semibold hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label="Toggle language"
+      >
+        <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+        <span className="text-muted-foreground">{lang === "en" ? "EN" : "ع"}</span>
+      </button>
 
       {/* Notifications */}
       <DropdownMenu>

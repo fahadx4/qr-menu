@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useDashboardStore } from "@/store/dashboard";
+import { useLanguageStore } from "@/store/language";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { TrialBanner } from "./trial-banner";
@@ -11,15 +12,21 @@ import { cn } from "@/lib/utils";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { sidebarCollapsed } = useDashboardStore();
+  const lang = useLanguageStore((s) => s.lang);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
   const collapsed = mounted ? sidebarCollapsed : false;
+  const isAr = mounted && lang === "ar";
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div
+      className={cn("flex min-h-screen bg-background", isAr && "font-arabic")}
+      dir={isAr ? "rtl" : "ltr"}
+      lang={isAr ? "ar" : "en"}
+    >
       {/* Desktop sidebar */}
       <aside
         className={cn(

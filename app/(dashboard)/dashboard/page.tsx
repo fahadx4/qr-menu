@@ -254,7 +254,7 @@ export default function DashboardPage() {
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${statusColors[order.status]}`}>
                       {statusLabels[order.status]}
                     </span>
-                    <div className={`flex items-center gap-1 text-[11px] font-medium ${agingColor}`}>
+                    <div suppressHydrationWarning className={`flex items-center gap-1 text-[11px] font-medium ${agingColor}`}>
                       <Clock className="h-3 w-3" />
                       {mins}m
                     </div>
