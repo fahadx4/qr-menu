@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { cn, formatPrice, generateId, timeAgo } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -181,22 +182,26 @@ const mockRecipes: Recipe[] = [
 
 const CATEGORIES = ["produce", "meat", "dairy", "dry_goods", "beverages", "packaging"] as const;
 
-const CATEGORY_LABELS: Record<Ingredient["category"], string> = {
-  produce:   "Produce",
-  meat:      "Meat",
-  dairy:     "Dairy",
-  dry_goods: "Dry Goods",
-  beverages: "Beverages",
-  packaging: "Packaging",
-};
+function getCategoryLabels(t: ReturnType<typeof useT>): Record<Ingredient["category"], string> {
+  return {
+    produce:   t.inv_catProduce,
+    meat:      t.inv_catMeat,
+    dairy:     t.inv_catDairy,
+    dry_goods: t.inv_catDryGoods,
+    beverages: t.inv_catBeverages,
+    packaging: t.inv_catPackaging,
+  };
+}
 
-const MOVEMENT_BADGE: Record<MovementType, { label: string; className: string }> = {
-  received: { label: "Received", className: "bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400"  },
-  used:     { label: "Used",     className: "bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400"   },
-  wasted:   { label: "Wasted",   className: "bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400"    },
-  adjusted: { label: "Adjusted", className: "bg-amber-100  text-amber-700  dark:bg-amber-900/30  dark:text-amber-400"  },
-  returned: { label: "Returned", className: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
-};
+function getMovementBadge(t: ReturnType<typeof useT>): Record<MovementType, { label: string; className: string }> {
+  return {
+    received: { label: t.inv_typeReceived, className: "bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-400"  },
+    used:     { label: t.inv_typeUsed,     className: "bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400"   },
+    wasted:   { label: t.inv_typeWasted,   className: "bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400"    },
+    adjusted: { label: t.inv_typeAdjusted, className: "bg-amber-100  text-amber-700  dark:bg-amber-900/30  dark:text-amber-400"  },
+    returned: { label: t.inv_typeReturned, className: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
+  };
+}
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -264,6 +269,8 @@ interface IngredientSheetProps {
 }
 
 function IngredientSheet({ open, onOpenChange, editing, onSave }: IngredientSheetProps) {
+  const t = useT();
+  const CATEGORY_LABELS = getCategoryLabels(t);
   const [form, setForm] = useState<IngredientForm>(blankForm());
 
   function handleOpenChange(v: boolean) {
@@ -277,7 +284,7 @@ function IngredientSheet({ open, onOpenChange, editing, onSave }: IngredientShee
 
   function handleSave() {
     if (!form.name.trim()) {
-      toast.error("Name is required");
+      toast.error(t.inv_colName + " " + t.required);
       return;
     }
     onSave(form, editing?.id ?? null);
@@ -288,15 +295,13 @@ function IngredientSheet({ open, onOpenChange, editing, onSave }: IngredientShee
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-sm overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{editing ? "Edit ingredient" : "Add ingredient"}</SheetTitle>
-          <SheetDescription>
-            {editing ? "Update ingredient details and stock levels." : "Add a new ingredient to your inventory."}
-          </SheetDescription>
+          <SheetTitle>{editing ? t.inv_editIngTitle : t.inv_addIngTitle}</SheetTitle>
+          <SheetDescription>{editing ? t.inv_editIngDesc : t.inv_addIngDesc}</SheetDescription>
         </SheetHeader>
 
         <div className="flex flex-col gap-4 px-4 py-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ing-name">Name <span className="text-destructive">*</span></Label>
+            <Label htmlFor="ing-name">{t.inv_colName} <span className="text-destructive">*</span></Label>
             <Input
               id="ing-name"
               placeholder="e.g. Beef patty (180g)"
@@ -307,7 +312,7 @@ function IngredientSheet({ open, onOpenChange, editing, onSave }: IngredientShee
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ing-unit">Unit</Label>
+              <Label htmlFor="ing-unit">{t.inv_unitLabel}</Label>
               <Select
                 value={form.unit}
                 onValueChange={(v) => set("unit", v as string)}
@@ -324,7 +329,7 @@ function IngredientSheet({ open, onOpenChange, editing, onSave }: IngredientShee
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ing-category">Category</Label>
+              <Label htmlFor="ing-category">{t.inv_colCategory}</Label>
               <Select
                 value={form.category}
                 onValueChange={(v) => set("category", v as string)}
@@ -343,7 +348,7 @@ function IngredientSheet({ open, onOpenChange, editing, onSave }: IngredientShee
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ing-stock">Current stock</Label>
+              <Label htmlFor="ing-stock">{t.inv_currentStockLabel}</Label>
               <Input
                 id="ing-stock"
                 type="number"
@@ -356,7 +361,7 @@ function IngredientSheet({ open, onOpenChange, editing, onSave }: IngredientShee
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ing-reorder">Reorder level</Label>
+              <Label htmlFor="ing-reorder">{t.inv_reorderLevelLabel}</Label>
               <Input
                 id="ing-reorder"
                 type="number"
@@ -370,7 +375,7 @@ function IngredientSheet({ open, onOpenChange, editing, onSave }: IngredientShee
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ing-cost">Unit cost ($)</Label>
+            <Label htmlFor="ing-cost">{t.inv_unitCostLabel}</Label>
             <Input
               id="ing-cost"
               type="number"
@@ -383,7 +388,7 @@ function IngredientSheet({ open, onOpenChange, editing, onSave }: IngredientShee
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ing-supplier">Supplier</Label>
+            <Label htmlFor="ing-supplier">{t.inv_supplierLabel}</Label>
             <Input
               id="ing-supplier"
               placeholder="e.g. Fresh Farms"
@@ -398,10 +403,10 @@ function IngredientSheet({ open, onOpenChange, editing, onSave }: IngredientShee
             onClick={() => onOpenChange(false)}
             className="inline-flex h-9 items-center justify-center rounded-lg border border-input bg-transparent px-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
           >
-            Cancel
+            {t.dashCancel}
           </button>
           <Button onClick={handleSave}>
-            {editing ? "Update" : "Add ingredient"}
+            {editing ? t.dashUpdate : t.inv_addIngTitle}
           </Button>
         </SheetFooter>
       </SheetContent>
@@ -428,6 +433,7 @@ function LogMovementDialog({
   defaultType = "received",
   onLog,
 }: LogMovementDialogProps) {
+  const t = useT();
   const [ingredientId, setIngredientId] = useState(defaultIngredientId);
   const [type, setType]                 = useState<MovementType>(defaultType);
   const [quantity, setQuantity]         = useState("");
@@ -444,8 +450,8 @@ function LogMovementDialog({
   }
 
   function handleSubmit() {
-    if (!ingredientId) { toast.error("Select an ingredient"); return; }
-    if (!quantity || isNaN(Number(quantity))) { toast.error("Enter a valid quantity"); return; }
+    if (!ingredientId) { toast.error(t.inv_selectIngredient); return; }
+    if (!quantity || isNaN(Number(quantity))) { toast.error(t.inv_colQuantity); return; }
 
     const ing = ingredients.find((i) => i.id === ingredientId);
     if (!ing) return;
@@ -465,16 +471,16 @@ function LogMovementDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Log stock movement</DialogTitle>
-          <DialogDescription>Record a change in ingredient stock levels.</DialogDescription>
+          <DialogTitle>{t.inv_logMovTitle}</DialogTitle>
+          <DialogDescription>{t.inv_logMovDesc}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
-            <Label>Ingredient</Label>
+            <Label>{t.inv_colIngredient}</Label>
             <Select value={ingredientId} onValueChange={(v) => setIngredientId(v as string)}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select ingredient…" />
+                <SelectValue placeholder={t.inv_selectIngredient} />
               </SelectTrigger>
               <SelectContent>
                 {ingredients.map((ing) => (
@@ -485,25 +491,23 @@ function LogMovementDialog({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label>Movement type</Label>
+            <Label>{t.inv_movementType}</Label>
             <Select value={type} onValueChange={(v) => setType(v as MovementType)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="received">Received</SelectItem>
-                <SelectItem value="used">Used</SelectItem>
-                <SelectItem value="wasted">Wasted</SelectItem>
-                <SelectItem value="adjusted">Adjusted (manual)</SelectItem>
-                <SelectItem value="returned">Returned to supplier</SelectItem>
+                <SelectItem value="received">{t.inv_typeReceived}</SelectItem>
+                <SelectItem value="used">{t.inv_typeUsed}</SelectItem>
+                <SelectItem value="wasted">{t.inv_typeWasted}</SelectItem>
+                <SelectItem value="adjusted">{t.inv_adjustedManual}</SelectItem>
+                <SelectItem value="returned">{t.inv_returnedSupplier}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="mov-qty">
-              Quantity
-              {type === "adjusted" && <span className="ml-1 text-xs text-muted-foreground">(negative to decrease)</span>}
+              {t.inv_colQuantity}
+              {type === "adjusted" && <span className="ms-1 text-xs text-muted-foreground">{t.inv_negToDecrease}</span>}
             </Label>
             <Input
               id="mov-qty"
@@ -516,7 +520,7 @@ function LogMovementDialog({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="mov-note">Note (optional)</Label>
+            <Label htmlFor="mov-note">{t.inv_noteOptional}</Label>
             <Textarea
               id="mov-note"
               placeholder="e.g. PO #1042, Evening service…"
@@ -528,8 +532,8 @@ function LogMovementDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} type="button">Cancel</Button>
-          <Button onClick={handleSubmit}>Log movement</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} type="button">{t.dashCancel}</Button>
+          <Button onClick={handleSubmit}>{t.inv_logMovBtn}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -545,6 +549,7 @@ interface RecipeCardProps {
 }
 
 function RecipeCard({ recipe, ingredients, onUpdate }: RecipeCardProps) {
+  const t = useT();
   const [editing, setEditing] = useState(false);
   const [editRecipe, setEditRecipe] = useState<Recipe>(recipe);
 
@@ -576,7 +581,7 @@ function RecipeCard({ recipe, ingredients, onUpdate }: RecipeCardProps) {
     const unused = ingredients.find(
       (i) => !editRecipe.ingredients.some((ri) => ri.ingredient_id === i.id)
     );
-    if (!unused) { toast.error("All ingredients already added"); return; }
+    if (!unused) { toast.error(t.inv_ingredientsLabel); return; }
     setEditRecipe((r) => ({
       ...r,
       ingredients: [...r.ingredients, { ingredient_id: unused.id, quantity: 1 }],
@@ -606,7 +611,7 @@ function RecipeCard({ recipe, ingredients, onUpdate }: RecipeCardProps) {
           <div>
             <CardTitle>{recipe.item_name}</CardTitle>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Selling price: {formatPrice(recipe.item_price)}
+              {t.inv_sellingPrice}: {formatPrice(recipe.item_price)}
             </p>
           </div>
           <Button
@@ -617,8 +622,8 @@ function RecipeCard({ recipe, ingredients, onUpdate }: RecipeCardProps) {
               setEditing(!editing);
             }}
           >
-            {editing ? <X className="h-3.5 w-3.5 mr-1" /> : <Edit className="h-3.5 w-3.5 mr-1" />}
-            {editing ? "Cancel" : "Edit recipe"}
+            {editing ? <X className="h-3.5 w-3.5 me-1" /> : <Edit className="h-3.5 w-3.5 me-1" />}
+            {editing ? t.dashCancel : t.inv_editRecipe}
           </Button>
         </div>
       </CardHeader>
@@ -629,10 +634,10 @@ function RecipeCard({ recipe, ingredients, onUpdate }: RecipeCardProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-left text-xs text-muted-foreground">
-                <th className="pb-2 pr-4 font-medium">Ingredient</th>
-                <th className="pb-2 pr-4 font-medium">Qty</th>
-                <th className="pb-2 pr-4 font-medium">Unit cost</th>
-                <th className="pb-2 font-medium text-right">Line cost</th>
+                <th className="pb-2 pr-4 font-medium">{t.inv_colIngredient}</th>
+                <th className="pb-2 pr-4 font-medium">{t.inv_colQty}</th>
+                <th className="pb-2 pr-4 font-medium">{t.inv_colUnitCost}</th>
+                <th className="pb-2 font-medium text-right">{t.inv_colLineCost}</th>
                 {editing && <th className="pb-2 pl-2" />}
               </tr>
             </thead>
@@ -712,8 +717,8 @@ function RecipeCard({ recipe, ingredients, onUpdate }: RecipeCardProps) {
         {editing && (
           <div className="mt-2">
             <Button variant="outline" size="sm" onClick={addIngredientLine} className="w-full">
-              <Plus className="h-3.5 w-3.5 mr-1" />
-              Add ingredient
+              <Plus className="h-3.5 w-3.5 me-1" />
+              {t.inv_addIngredient}
             </Button>
           </div>
         )}
@@ -723,11 +728,11 @@ function RecipeCard({ recipe, ingredients, onUpdate }: RecipeCardProps) {
         {/* Totals */}
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Total COGS</span>
+            <span className="text-muted-foreground">{t.inv_totalCogs}</span>
             <span className="tabular-nums font-medium">{formatPrice(cogs)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Gross margin</span>
+            <span className="text-muted-foreground">{t.inv_grossMargin}</span>
             <span className={cn("tabular-nums font-medium", marginColor)}>
               {formatPrice(grossMargin)}{" "}
               <span className="text-xs">({marginPct.toFixed(1)}%)</span>
@@ -737,7 +742,7 @@ function RecipeCard({ recipe, ingredients, onUpdate }: RecipeCardProps) {
 
         {editing && (
           <div className="mt-4">
-            <Button onClick={saveEdit} className="w-full">Save recipe</Button>
+            <Button onClick={saveEdit} className="w-full">{t.inv_saveRecipe}</Button>
           </div>
         )}
       </CardContent>
@@ -755,6 +760,7 @@ interface AddRecipeDialogProps {
 }
 
 function AddRecipeDialog({ open, onOpenChange, ingredients, onAdd }: AddRecipeDialogProps) {
+  const t = useT();
   const [itemName, setItemName]     = useState("");
   const [itemPrice, setItemPrice]   = useState("");
   const [lines, setLines]           = useState<RecipeIngredient[]>([
@@ -772,7 +778,7 @@ function AddRecipeDialog({ open, onOpenChange, ingredients, onAdd }: AddRecipeDi
 
   function addLine() {
     const unused = ingredients.find((i) => !lines.some((l) => l.ingredient_id === i.id));
-    if (!unused) { toast.error("All ingredients already added"); return; }
+    if (!unused) { toast.error(t.inv_ingredientsLabel); return; }
     setLines((ls) => [...ls, { ingredient_id: unused.id, quantity: 1 }]);
   }
 
@@ -785,9 +791,9 @@ function AddRecipeDialog({ open, onOpenChange, ingredients, onAdd }: AddRecipeDi
   }
 
   function handleAdd() {
-    if (!itemName.trim()) { toast.error("Item name is required"); return; }
-    if (!itemPrice || isNaN(Number(itemPrice))) { toast.error("Enter a valid price"); return; }
-    if (lines.length === 0) { toast.error("Add at least one ingredient"); return; }
+    if (!itemName.trim()) { toast.error(t.inv_itemNameLabel); return; }
+    if (!itemPrice || isNaN(Number(itemPrice))) { toast.error(t.inv_sellingPriceLabel); return; }
+    if (lines.length === 0) { toast.error(t.inv_addIngredient); return; }
 
     onAdd({
       item_id:     generateId(),
@@ -802,14 +808,14 @@ function AddRecipeDialog({ open, onOpenChange, ingredients, onAdd }: AddRecipeDi
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add recipe</DialogTitle>
-          <DialogDescription>Define a menu item and its ingredient costs.</DialogDescription>
+          <DialogTitle>{t.inv_addRecipeTitle}</DialogTitle>
+          <DialogDescription>{t.inv_addRecipeDesc}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="recipe-name">Item name <span className="text-destructive">*</span></Label>
+              <Label htmlFor="recipe-name">{t.inv_itemNameLabel} <span className="text-destructive">*</span></Label>
               <Input
                 id="recipe-name"
                 placeholder="e.g. Caesar Salad"
@@ -818,7 +824,7 @@ function AddRecipeDialog({ open, onOpenChange, ingredients, onAdd }: AddRecipeDi
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="recipe-price">Selling price ($)</Label>
+              <Label htmlFor="recipe-price">{t.inv_sellingPriceLabel}</Label>
               <Input
                 id="recipe-price"
                 type="number"
@@ -832,7 +838,7 @@ function AddRecipeDialog({ open, onOpenChange, ingredients, onAdd }: AddRecipeDi
           </div>
 
           <div>
-            <Label className="mb-2 block">Ingredients</Label>
+            <Label className="mb-2 block">{t.inv_ingredientsLabel}</Label>
             <div className="space-y-2">
               {lines.map((line, idx) => (
                 <div key={idx} className="flex items-center gap-2">
@@ -868,14 +874,14 @@ function AddRecipeDialog({ open, onOpenChange, ingredients, onAdd }: AddRecipeDi
               ))}
             </div>
             <Button variant="outline" size="sm" className="mt-2 w-full" onClick={addLine}>
-              <Plus className="h-3.5 w-3.5 mr-1" /> Add ingredient
+              <Plus className="h-3.5 w-3.5 me-1" /> {t.inv_addIngredient}
             </Button>
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} type="button">Cancel</Button>
-          <Button onClick={handleAdd}>Add recipe</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} type="button">{t.dashCancel}</Button>
+          <Button onClick={handleAdd}>{t.inv_addRecipe}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -885,6 +891,9 @@ function AddRecipeDialog({ open, onOpenChange, ingredients, onAdd }: AddRecipeDi
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function InventoryPage() {
+  const t = useT();
+  const CATEGORY_LABELS = getCategoryLabels(t);
+  const MOVEMENT_BADGE = getMovementBadge(t);
   const [ingredients, setIngredients] = useState<Ingredient[]>(INITIAL_INGREDIENTS);
   const [movements,   setMovements]   = useState<StockMovement[]>(INITIAL_MOVEMENTS);
   const [recipes,     setRecipes]     = useState<Recipe[]>(mockRecipes);
@@ -973,7 +982,7 @@ export default function InventoryPage() {
             : i
         )
       );
-      toast.success("Ingredient updated");
+      toast.success(t.inv_toastIngUpdated);
     } else {
       const newIng: Ingredient = {
         id:            generateId(),
@@ -987,13 +996,13 @@ export default function InventoryPage() {
         last_updated:  now,
       };
       setIngredients((prev) => [...prev, newIng]);
-      toast.success("Ingredient added");
+      toast.success(t.inv_toastIngAdded);
     }
   }
 
   function handleDeleteIngredient(id: string) {
     setIngredients((prev) => prev.filter((i) => i.id !== id));
-    toast.success("Ingredient removed");
+    toast.success(t.inv_toastIngRemoved);
   }
 
   function openLogReceived(ingId: string) {
@@ -1037,17 +1046,17 @@ export default function InventoryPage() {
           : i
       )
     );
-    toast.success(`Stock movement logged — ${data.ingredient_name}`);
+    toast.success(`${t.inv_toastMovLogged} — ${data.ingredient_name}`);
   }
 
   function handleUpdateRecipe(updated: Recipe) {
     setRecipes((prev) => prev.map((r) => r.item_id === updated.item_id ? updated : r));
-    toast.success("Recipe updated");
+    toast.success(t.inv_toastRecipeUpdated);
   }
 
   function handleAddRecipe(r: Recipe) {
     setRecipes((prev) => [...prev, r]);
-    toast.success("Recipe added");
+    toast.success(t.inv_toastRecipeAdded);
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -1056,17 +1065,15 @@ export default function InventoryPage() {
     <div className="flex flex-col gap-6 p-6">
       {/* Page header */}
       <div>
-        <h1 className="font-heading text-2xl font-semibold">Inventory</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Track ingredients, stock levels, and recipe costs
-        </p>
+        <h1 className="font-heading text-2xl font-semibold">{t.inv_pageTitle}</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{t.inv_pageSubtitle}</p>
       </div>
 
       <Tabs defaultValue="ingredients">
         <TabsList>
-          <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
-          <TabsTrigger value="movements">Stock Movements</TabsTrigger>
-          <TabsTrigger value="recipes">Recipe Costing</TabsTrigger>
+          <TabsTrigger value="ingredients">{t.inv_tabIngredients}</TabsTrigger>
+          <TabsTrigger value="movements">{t.inv_tabMovements}</TabsTrigger>
+          <TabsTrigger value="recipes">{t.inv_tabRecipes}</TabsTrigger>
         </TabsList>
 
         {/* ── Tab 1: Ingredients ──────────────────────────────────────── */}
@@ -1078,7 +1085,7 @@ export default function InventoryPage() {
               <div className="relative flex-1 min-w-48">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                 <Input
-                  placeholder="Search ingredients or suppliers…"
+                  placeholder={t.inv_searchPlaceholder}
                   className="pl-8"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -1087,10 +1094,10 @@ export default function InventoryPage() {
 
               <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as string)}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="All categories" />
+                  <SelectValue placeholder={t.inv_allCategories} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All categories</SelectItem>
+                  <SelectItem value="all">{t.inv_allCategories}</SelectItem>
                   {CATEGORIES.map((c) => (
                     <SelectItem key={c} value={c}>{CATEGORY_LABELS[c]}</SelectItem>
                   ))}
@@ -1098,12 +1105,10 @@ export default function InventoryPage() {
               </Select>
 
               <Button variant="outline" onClick={openLogMovement}>
-                <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-                Log stock movement
+                <RefreshCw className="h-3.5 w-3.5 me-1.5" />{t.inv_logMovement}
               </Button>
               <Button onClick={openAddIngredient}>
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                Add ingredient
+                <Plus className="h-3.5 w-3.5 me-1.5" />{t.inv_addIngredient}
               </Button>
             </div>
 
@@ -1112,8 +1117,7 @@ export default function InventoryPage() {
               <Card size="sm">
                 <CardContent className="pt-3">
                   <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-                    <Package className="h-3.5 w-3.5" />
-                    Total SKUs
+                    <Package className="h-3.5 w-3.5" />{t.inv_totalSkus}
                   </div>
                   <p className="text-2xl font-semibold tabular-nums">{ingredients.length}</p>
                 </CardContent>
@@ -1122,8 +1126,7 @@ export default function InventoryPage() {
               <Card size="sm">
                 <CardContent className="pt-3">
                   <div className="flex items-center gap-2 text-xs mb-1 text-red-600 dark:text-red-400">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    Low stock alerts
+                    <AlertTriangle className="h-3.5 w-3.5" />{t.inv_lowStockAlerts}
                   </div>
                   <p className="text-2xl font-semibold tabular-nums text-red-600 dark:text-red-400">
                     {lowStockIngredients.length}
@@ -1134,8 +1137,7 @@ export default function InventoryPage() {
               <Card size="sm">
                 <CardContent className="pt-3">
                   <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-                    <DollarSign className="h-3.5 w-3.5" />
-                    Inventory value
+                    <DollarSign className="h-3.5 w-3.5" />{t.inv_inventoryValue}
                   </div>
                   <p className="text-2xl font-semibold tabular-nums">
                     {formatPrice(totalInventoryValue)}
@@ -1146,8 +1148,7 @@ export default function InventoryPage() {
               <Card size="sm">
                 <CardContent className="pt-3">
                   <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
-                    <TrendingDown className="h-3.5 w-3.5" />
-                    Need reorder
+                    <TrendingDown className="h-3.5 w-3.5" />{t.inv_needReorder}
                   </div>
                   <p className="text-2xl font-semibold tabular-nums">
                     {lowStockIngredients.length}
@@ -1162,15 +1163,15 @@ export default function InventoryPage() {
                 <div className="flex items-center gap-2 text-sm text-amber-800 dark:text-amber-300">
                   <AlertTriangle className="h-4 w-4 flex-shrink-0" />
                   <span>
-                    <strong>{lowStockIngredients.length} ingredient{lowStockIngredients.length > 1 ? "s are" : " is"} below reorder level:</strong>{" "}
+                    <strong>{lowStockIngredients.length} {t.inv_belowReorderLevel}:</strong>{" "}
                     {lowStockIngredients.map((i) => i.name).join(", ")}
                   </span>
                 </div>
                 <button
-                  onClick={() => toast.info("Purchase order feature coming soon")}
+                  onClick={() => toast.info(t.inv_createPO)}
                   className="shrink-0 text-xs font-medium text-amber-700 dark:text-amber-300 hover:underline"
                 >
-                  Create purchase order
+                  {t.inv_createPO}
                 </button>
               </div>
             )}
@@ -1182,21 +1183,21 @@ export default function InventoryPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Name</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Category</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Current stock</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Reorder level</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Unit cost</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Supplier</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Updated</th>
-                        <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Actions</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colName}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colCategory}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colCurrentStock}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colReorderLevel}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colUnitCost}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colSupplier}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colUpdated}</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">{t.dashActions}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredIngredients.length === 0 && (
                         <tr>
                           <td colSpan={8} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                            No ingredients found
+                            {t.inv_noFound}
                           </td>
                         </tr>
                       )}
@@ -1262,29 +1263,22 @@ export default function InventoryPage() {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuGroup>
-                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuLabel>{t.dashActions}</DropdownMenuLabel>
                                     <DropdownMenuItem onClick={() => openLogReceived(ing.id)}>
-                                      <ArrowDownToLine className="h-4 w-4" />
-                                      Log received
+                                      <ArrowDownToLine className="h-4 w-4" />{t.inv_logReceived}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => openLogWaste(ing.id)}>
-                                      <Trash2 className="h-4 w-4" />
-                                      Log waste
+                                      <Trash2 className="h-4 w-4" />{t.inv_logWaste}
                                     </DropdownMenuItem>
                                   </DropdownMenuGroup>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuGroup>
-                                    <DropdownMenuLabel>Manage</DropdownMenuLabel>
+                                    <DropdownMenuLabel>{t.inv_manage}</DropdownMenuLabel>
                                     <DropdownMenuItem onClick={() => openEditIngredient(ing)}>
-                                      <Edit className="h-4 w-4" />
-                                      Edit
+                                      <Edit className="h-4 w-4" />{t.dashEdit}
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      variant="destructive"
-                                      onClick={() => handleDeleteIngredient(ing.id)}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                      Delete
+                                    <DropdownMenuItem variant="destructive" onClick={() => handleDeleteIngredient(ing.id)}>
+                                      <Trash2 className="h-4 w-4" />{t.dashDelete}
                                     </DropdownMenuItem>
                                   </DropdownMenuGroup>
                                 </DropdownMenuContent>
@@ -1309,32 +1303,32 @@ export default function InventoryPage() {
             <div className="flex flex-wrap items-center gap-2">
               <Select value={movTypeFilter} onValueChange={(v) => setMovTypeFilter(v as string)}>
                 <SelectTrigger className="w-44">
-                  <SelectValue placeholder="All types" />
+                  <SelectValue placeholder={t.inv_allTypes} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All types</SelectItem>
-                  <SelectItem value="received">Received</SelectItem>
-                  <SelectItem value="used">Used</SelectItem>
-                  <SelectItem value="wasted">Wasted</SelectItem>
-                  <SelectItem value="adjusted">Adjusted</SelectItem>
-                  <SelectItem value="returned">Returned</SelectItem>
+                  <SelectItem value="all">{t.inv_allTypes}</SelectItem>
+                  <SelectItem value="received">{t.inv_typeReceived}</SelectItem>
+                  <SelectItem value="used">{t.inv_typeUsed}</SelectItem>
+                  <SelectItem value="wasted">{t.inv_typeWasted}</SelectItem>
+                  <SelectItem value="adjusted">{t.inv_typeAdjusted}</SelectItem>
+                  <SelectItem value="returned">{t.inv_typeReturned}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={dateFilter} onValueChange={(v) => setDateFilter(v as string)}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="All time" />
+                  <SelectValue placeholder={t.inv_allTime} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All time</SelectItem>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="this_week">This week</SelectItem>
-                  <SelectItem value="this_month">This month</SelectItem>
+                  <SelectItem value="all">{t.inv_allTime}</SelectItem>
+                  <SelectItem value="today">{t.today}</SelectItem>
+                  <SelectItem value="this_week">{t.inv_thisWeek}</SelectItem>
+                  <SelectItem value="this_month">{t.inv_thisMonth}</SelectItem>
                 </SelectContent>
               </Select>
 
-              <div className="ml-auto text-xs text-muted-foreground">
-                {filteredMovements.length} movement{filteredMovements.length !== 1 ? "s" : ""}
+              <div className="ms-auto text-xs text-muted-foreground">
+                {filteredMovements.length} {filteredMovements.length !== 1 ? t.inv_movementPlural : t.inv_movementSingular}
               </div>
             </div>
 
@@ -1345,19 +1339,19 @@ export default function InventoryPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Ingredient</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Type</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Quantity</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Note</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">By</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Time</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colIngredient}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colType}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colQuantity}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colNote}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colBy}</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">{t.inv_colTime}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredMovements.length === 0 && (
                         <tr>
                           <td colSpan={6} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                            No movements found
+                            {t.inv_noMovements}
                           </td>
                         </tr>
                       )}
@@ -1396,21 +1390,18 @@ export default function InventoryPage() {
 
             <div className="flex items-center justify-between gap-2">
               <div>
-                <h2 className="font-medium">Recipe costing</h2>
-                <p className="text-sm text-muted-foreground">
-                  See your gross margin for each menu item
-                </p>
+                <h2 className="font-medium">{t.inv_recipeCostingTitle}</h2>
+                <p className="text-sm text-muted-foreground">{t.inv_recipeCostingDesc}</p>
               </div>
               <Button onClick={() => setAddRecipeOpen(true)}>
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                Add recipe
+                <Plus className="h-3.5 w-3.5 me-1.5" />{t.inv_addRecipe}
               </Button>
             </div>
 
             {recipes.length === 0 && (
               <div className="flex flex-col items-center gap-2 py-12 text-center">
                 <ChefHat className="h-10 w-10 text-muted-foreground/40" />
-                <p className="text-sm text-muted-foreground">No recipes yet. Add one to get started.</p>
+                <p className="text-sm text-muted-foreground">{t.inv_noRecipes}</p>
               </div>
             )}
 

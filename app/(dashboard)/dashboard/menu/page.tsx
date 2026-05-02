@@ -39,6 +39,7 @@ import {
 import { mockMenus, mockCategories, mockItems } from "@/mock/menu";
 import type { Menu, Category, Item, ItemTag } from "@/types";
 import { cn, formatPrice, generateId } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -157,6 +158,7 @@ function DeleteConfirmDialog({
   description,
   onConfirm,
 }: DeleteConfirmDialogProps) {
+  const t = useT();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xs">
@@ -166,13 +168,13 @@ function DeleteConfirmDialog({
         <p className="text-sm text-muted-foreground">{description}</p>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
-            Cancel
+            {t.dashCancel}
           </Button>
           <Button
             variant="destructive"
             onClick={() => { onConfirm(); onOpenChange(false); }}
           >
-            Delete
+            {t.dashDelete}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -190,6 +192,7 @@ interface MenuDialogProps {
 }
 
 function MenuDialog({ open, onOpenChange, menu, onSave }: MenuDialogProps) {
+  const t = useT();
   const [name, setName]           = useState(menu?.name ?? "");
   const [description, setDesc]    = useState(menu?.description ?? "");
   const [availFrom, setAvailFrom] = useState(menu?.available_from ?? "");
@@ -232,13 +235,13 @@ function MenuDialog({ open, onOpenChange, menu, onSave }: MenuDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>{menu ? "Edit menu" : "Add menu"}</DialogTitle>
+          <DialogTitle>{menu ? t.mnu_editMenu : t.mnu_addMenu}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="menu-name">
-              Name <span className="text-destructive">*</span>
+              {t.name} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="menu-name"
@@ -249,10 +252,10 @@ function MenuDialog({ open, onOpenChange, menu, onSave }: MenuDialogProps) {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="menu-description">Description</Label>
+            <Label htmlFor="menu-description">{t.notes}</Label>
             <Input
               id="menu-description"
-              placeholder="Optional description"
+              placeholder={t.mnu_optionalDesc}
               value={description}
               onChange={(e) => setDesc(e.target.value)}
             />
@@ -260,7 +263,7 @@ function MenuDialog({ open, onOpenChange, menu, onSave }: MenuDialogProps) {
 
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="menu-from">Available from</Label>
+              <Label htmlFor="menu-from">{t.mnu_availableFrom}</Label>
               <Input
                 id="menu-from"
                 type="time"
@@ -269,7 +272,7 @@ function MenuDialog({ open, onOpenChange, menu, onSave }: MenuDialogProps) {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="menu-to">Available to</Label>
+              <Label htmlFor="menu-to">{t.mnu_availableTo}</Label>
               <Input
                 id="menu-to"
                 type="time"
@@ -280,18 +283,18 @@ function MenuDialog({ open, onOpenChange, menu, onSave }: MenuDialogProps) {
           </div>
 
           <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-            <Label htmlFor="menu-active" className="cursor-pointer">Active</Label>
+            <Label htmlFor="menu-active" className="cursor-pointer">{t.mnu_active}</Label>
             <Switch id="menu-active" checked={isActive} onCheckedChange={setIsActive} />
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
-            Cancel
+            {t.dashCancel}
           </Button>
           <Button onClick={handleSave} disabled={saving || !name.trim()}>
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {menu ? "Update" : "Add menu"}
+            {menu ? t.dashUpdate : t.mnu_addMenu}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -310,6 +313,7 @@ interface CategoryDialogProps {
 }
 
 function CategoryDialog({ open, onOpenChange, category, menuId, onSave }: CategoryDialogProps) {
+  const t = useT();
   const [name, setName]         = useState(category?.name ?? "");
   const [isActive, setIsActive] = useState(category?.is_active ?? true);
   const [saving, setSaving]     = useState(false);
@@ -344,13 +348,13 @@ function CategoryDialog({ open, onOpenChange, category, menuId, onSave }: Catego
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-xs">
         <DialogHeader>
-          <DialogTitle>{category ? "Edit category" : "Add category"}</DialogTitle>
+          <DialogTitle>{category ? t.mnu_editCategory : t.mnu_addCategory}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="cat-name">
-              Name <span className="text-destructive">*</span>
+              {t.name} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="cat-name"
@@ -361,18 +365,18 @@ function CategoryDialog({ open, onOpenChange, category, menuId, onSave }: Catego
           </div>
 
           <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-            <Label htmlFor="cat-active" className="cursor-pointer">Active</Label>
+            <Label htmlFor="cat-active" className="cursor-pointer">{t.mnu_active}</Label>
             <Switch id="cat-active" checked={isActive} onCheckedChange={setIsActive} />
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
-            Cancel
+            {t.dashCancel}
           </Button>
           <Button onClick={handleSave} disabled={saving || !name.trim()}>
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {category ? "Update" : "Add category"}
+            {category ? t.dashUpdate : t.mnu_addCategory}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -400,6 +404,7 @@ interface MenusPanelProps {
 }
 
 function MenusPanel({ menus, selectedMenuId, onSelectMenu, onMenusChange }: MenusPanelProps) {
+  const t = useT();
   const [dialogOpen, setDialogOpen]     = useState(false);
   const [editingMenu, setEditingMenu]   = useState<Menu | null>(null);
   const [deleteState, setDeleteState]   = useState<{ open: boolean; menu: Menu | null }>({ open: false, menu: null });
@@ -408,10 +413,10 @@ function MenusPanel({ menus, selectedMenuId, onSelectMenu, onMenusChange }: Menu
     const exists = menus.some((m) => m.id === saved.id);
     if (exists) {
       onMenusChange(menus.map((m) => (m.id === saved.id ? saved : m)));
-      toast.success("Menu updated");
+      toast.success(t.mnu_menuUpdated);
     } else {
       onMenusChange([...menus, saved]);
-      toast.success("Menu added");
+      toast.success(t.mnu_menuAdded);
     }
   }
 
@@ -422,18 +427,18 @@ function MenusPanel({ menus, selectedMenuId, onSelectMenu, onMenusChange }: Menu
   function handleDuplicate(menu: Menu) {
     const dup: Menu = { ...menu, id: generateId(), name: `${menu.name} (copy)`, sort_order: menus.length + 1 };
     onMenusChange([...menus, dup]);
-    toast.success("Menu duplicated");
+    toast.success(t.mnu_menuDuplicated);
   }
 
   function handleDelete(menu: Menu) {
     onMenusChange(menus.filter((m) => m.id !== menu.id));
-    toast.success("Menu deleted");
+    toast.success(t.mnu_menuDeleted);
   }
 
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 py-3 border-b border-border">
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Menus</h2>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t.mnu_menusSection}</h2>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -495,7 +500,7 @@ function MenusPanel({ menus, selectedMenuId, onSelectMenu, onMenusChange }: Menu
                       }}
                     >
                       <Edit className="h-3.5 w-3.5" />
-                      Edit
+                      {t.dashEdit}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={(e: React.MouseEvent) => {
@@ -504,7 +509,7 @@ function MenusPanel({ menus, selectedMenuId, onSelectMenu, onMenusChange }: Menu
                       }}
                     >
                       <CheckSquare className="h-3.5 w-3.5" />
-                      {menu.is_active ? "Deactivate" : "Activate"}
+                      {menu.is_active ? t.mnu_deactivate : t.mnu_activate}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={(e: React.MouseEvent) => {
@@ -513,7 +518,7 @@ function MenusPanel({ menus, selectedMenuId, onSelectMenu, onMenusChange }: Menu
                       }}
                     >
                       <Copy className="h-3.5 w-3.5" />
-                      Duplicate
+                      {t.mnu_duplicate}
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
@@ -526,7 +531,7 @@ function MenusPanel({ menus, selectedMenuId, onSelectMenu, onMenusChange }: Menu
                       }}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
-                      Delete
+                      {t.dashDelete}
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
@@ -544,7 +549,7 @@ function MenusPanel({ menus, selectedMenuId, onSelectMenu, onMenusChange }: Menu
           onClick={() => { setEditingMenu(null); setDialogOpen(true); }}
         >
           <Plus className="h-3.5 w-3.5" />
-          Add menu
+          {t.mnu_addMenu}
         </Button>
       </div>
 
@@ -558,8 +563,8 @@ function MenusPanel({ menus, selectedMenuId, onSelectMenu, onMenusChange }: Menu
       <DeleteConfirmDialog
         open={deleteState.open}
         onOpenChange={(v) => setDeleteState((s) => ({ ...s, open: v }))}
-        title="Delete menu"
-        description={`Are you sure you want to delete "${deleteState.menu?.name}"? This cannot be undone.`}
+        title={t.mnu_deleteMenu}
+        description={`${t.mnu_cannotUndo}`}
         onConfirm={() => deleteState.menu && handleDelete(deleteState.menu)}
       />
     </div>
@@ -585,6 +590,7 @@ function CategoriesPanel({
   onCategoriesChange,
   itemCounts,
 }: CategoriesPanelProps) {
+  const t = useT();
   const [dialogOpen, setDialogOpen]   = useState(false);
   const [editingCat, setEditingCat]   = useState<Category | null>(null);
   const [deleteState, setDeleteState] = useState<{ open: boolean; cat: Category | null }>({ open: false, cat: null });
@@ -607,10 +613,10 @@ function CategoriesPanel({
     const exists = categories.some((c) => c.id === saved.id);
     if (exists) {
       onCategoriesChange(categories.map((c) => (c.id === saved.id ? saved : c)));
-      toast.success("Category updated");
+      toast.success(t.mnu_categoryUpdated);
     } else {
       onCategoriesChange([...categories, saved]);
-      toast.success("Category added");
+      toast.success(t.mnu_categoryAdded);
     }
   }
 
@@ -621,14 +627,14 @@ function CategoriesPanel({
   function handleDelete(cat: Category) {
     onCategoriesChange(categories.filter((c) => c.id !== cat.id));
     if (selectedCategoryId === cat.id) onSelectCategory(null);
-    toast.success("Category deleted");
+    toast.success(t.mnu_categoryDeleted);
   }
 
   if (!selectedMenuId) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-6 text-center gap-2">
         <UtensilsCrossed className="h-8 w-8 text-muted-foreground/40" />
-        <p className="text-sm text-muted-foreground">Select a menu to view categories</p>
+        <p className="text-sm text-muted-foreground">{t.mnu_selectMenuFirst}</p>
       </div>
     );
   }
@@ -636,7 +642,7 @@ function CategoriesPanel({
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 py-3 border-b border-border">
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Categories</h2>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t.mnu_categoriesSection}</h2>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -704,7 +710,7 @@ function CategoriesPanel({
                               }}
                             >
                               <Edit className="h-3.5 w-3.5" />
-                              Edit
+                              {t.dashEdit}
                             </DropdownMenuItem>
                           </DropdownMenuGroup>
                           <DropdownMenuSeparator />
@@ -717,7 +723,7 @@ function CategoriesPanel({
                               }}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
-                              Delete
+                              {t.dashDelete}
                             </DropdownMenuItem>
                           </DropdownMenuGroup>
                         </DropdownMenuContent>
@@ -739,7 +745,7 @@ function CategoriesPanel({
           onClick={() => { setEditingCat(null); setDialogOpen(true); }}
         >
           <Plus className="h-3.5 w-3.5" />
-          Add category
+          {t.mnu_addCategory}
         </Button>
       </div>
 
@@ -754,8 +760,8 @@ function CategoriesPanel({
       <DeleteConfirmDialog
         open={deleteState.open}
         onOpenChange={(v) => setDeleteState((s) => ({ ...s, open: v }))}
-        title="Delete category"
-        description={`Are you sure you want to delete "${deleteState.cat?.name}"?`}
+        title={t.mnu_deleteCategory}
+        description={t.mnu_cannotUndo}
         onConfirm={() => deleteState.cat && handleDelete(deleteState.cat)}
       />
     </div>
@@ -779,6 +785,7 @@ function ItemsPanel({
   onItemsChange,
   totalItemCount,
 }: ItemsPanelProps) {
+  const t = useT();
   const [search, setSearch]             = useState("");
   const [categoryFilter, setCatFilter]  = useState<string>("all");
   const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set());
@@ -822,19 +829,19 @@ function ItemsPanel({
 
   function handleToggleAvailability(item: Item) {
     onItemsChange(items.map((i) => i.id === item.id ? { ...i, is_available: !i.is_available } : i));
-    toast.success(item.is_available ? `"${item.name}" marked unavailable` : `"${item.name}" marked available`);
+    toast.success(item.is_available ? t.mnu_markUnavailable : t.mnu_markAvailable);
   }
 
   function handleDuplicate(item: Item) {
     const dup: Item = { ...item, id: generateId(), name: `${item.name} (copy)`, sort_order: items.length + 1 };
     onItemsChange([...items, dup]);
-    toast.success("Item duplicated");
+    toast.success(t.mnu_itemDuplicated);
   }
 
   function handleDelete(item: Item) {
     onItemsChange(items.filter((i) => i.id !== item.id));
     setSelectedIds((prev) => { const n = new Set(prev); n.delete(item.id); return n; });
-    toast.success("Item deleted");
+    toast.success(t.mnu_itemDeleted);
   }
 
   function handleSave(saved: Item) {
@@ -848,19 +855,19 @@ function ItemsPanel({
 
   function bulkToggleAvailability(makeAvailable: boolean) {
     onItemsChange(items.map((i) => selectedIds.has(i.id) ? { ...i, is_available: makeAvailable } : i));
-    toast.success(`${selectedIds.size} items marked ${makeAvailable ? "available" : "unavailable"}`);
+    toast.success(`${selectedIds.size} ${makeAvailable ? t.mnu_markAvailable : t.mnu_markUnavailable}`);
     setSelectedIds(new Set());
   }
 
   function bulkDelete() {
     onItemsChange(items.filter((i) => !selectedIds.has(i.id)));
-    toast.success(`${selectedIds.size} items deleted`);
+    toast.success(`${selectedIds.size} ${t.mnu_itemDeleted}`);
     setSelectedIds(new Set());
   }
 
   function bulkMoveToCategory(catId: string) {
     onItemsChange(items.map((i) => selectedIds.has(i.id) ? { ...i, category_id: catId } : i));
-    toast.success(`${selectedIds.size} items moved to ${catById[catId]}`);
+    toast.success(`${selectedIds.size} ${t.mnu_moveToCategory}`);
     setSelectedIds(new Set());
     setBulkMoveOpen(false);
   }
@@ -871,11 +878,11 @@ function ItemsPanel({
       <div className="px-4 pt-3 pb-2 border-b border-border">
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs text-muted-foreground">
-            {totalItemCount} / {ITEM_LIMIT} items used
+            {totalItemCount} / {ITEM_LIMIT} {t.mnu_itemsUsed}
           </span>
           {atLimit && (
             <span className="text-xs font-medium text-destructive">
-              Upgrade to add more items
+              {t.mnu_upgradePlan}
             </span>
           )}
         </div>
@@ -887,7 +894,7 @@ function ItemsPanel({
         <div className="relative flex-1 min-w-[140px]">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <Input
-            placeholder="Search items..."
+            placeholder={t.mnu_searchItems}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-8 h-8 text-sm"
@@ -902,7 +909,7 @@ function ItemsPanel({
             <SelectValue placeholder="All categories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All categories</SelectItem>
+            <SelectItem value="all">{t.mnu_allCategories}</SelectItem>
             {categories.map((cat) => (
               <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
             ))}
@@ -915,7 +922,7 @@ function ItemsPanel({
           onClick={() => { setEditingItem(null); setSheetOpen(true); }}
         >
           <Plus className="h-3.5 w-3.5" />
-          Add item
+          {t.mnu_addItem}
         </Button>
       </div>
 
@@ -929,14 +936,14 @@ function ItemsPanel({
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             className="flex items-center gap-2 px-4 py-2 bg-primary/5 border-b border-border flex-wrap"
           >
-            <span className="text-sm font-medium">{selectedIds.size} selected</span>
+            <span className="text-sm font-medium">{selectedIds.size} {t.mnu_selected}</span>
             <Separator orientation="vertical" className="h-4" />
-            <Button size="xs" variant="outline" onClick={() => bulkToggleAvailability(true)}>Mark available</Button>
-            <Button size="xs" variant="outline" onClick={() => bulkToggleAvailability(false)}>Mark unavailable</Button>
+            <Button size="xs" variant="outline" onClick={() => bulkToggleAvailability(true)}>{t.mnu_markAvailable}</Button>
+            <Button size="xs" variant="outline" onClick={() => bulkToggleAvailability(false)}>{t.mnu_markUnavailable}</Button>
 
             <DropdownMenu open={bulkMoveOpen} onOpenChange={setBulkMoveOpen}>
               <DropdownMenuTrigger render={<Button size="xs" variant="outline" />}>
-                Move to category
+                {t.mnu_moveToCategory}
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuGroup>
@@ -951,10 +958,10 @@ function ItemsPanel({
 
             <Button size="xs" variant="destructive" onClick={bulkDelete}>
               <Trash2 className="h-3.5 w-3.5" />
-              Delete
+              {t.dashDelete}
             </Button>
             <Button size="xs" variant="ghost" className="ml-auto" onClick={() => setSelectedIds(new Set())}>
-              Clear
+              {t.mnu_clear}
             </Button>
           </motion.div>
         )}
@@ -968,15 +975,15 @@ function ItemsPanel({
               <UtensilsCrossed className="h-7 w-7 text-muted-foreground/50" />
             </div>
             <div>
-              <p className="text-sm font-medium">No items found</p>
+              <p className="text-sm font-medium">{t.mnu_noItemsFound}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {search ? "Try a different search term" : "Add your first item to get started"}
+                {search ? t.mnu_tryDifferentSearch : t.mnu_addFirstItemHint}
               </p>
             </div>
             {!search && (
               <Button size="sm" variant="outline" disabled={atLimit} onClick={() => { setEditingItem(null); setSheetOpen(true); }}>
                 <Plus className="h-3.5 w-3.5" />
-                Add your first item
+                {t.mnu_addFirstItemBtn}
               </Button>
             )}
           </div>
@@ -988,10 +995,10 @@ function ItemsPanel({
                 checked={selectedIds.size > 0 && selectedIds.size === visibleItems.length}
                 onCheckedChange={toggleSelectAll}
               />
-              <span className="flex-1">Item</span>
-              <span className="w-24 text-right hidden sm:block">Category</span>
-              <span className="w-16 text-right">Price</span>
-              <span className="w-12 text-center">Avail.</span>
+              <span className="flex-1">{t.mnu_colItem}</span>
+              <span className="w-24 text-right hidden sm:block">{t.mnu_colCategory}</span>
+              <span className="w-16 text-right">{t.mnu_colPrice}</span>
+              <span className="w-12 text-center">{t.mnu_colAvail}</span>
               <span className="w-8" />
             </div>
 
@@ -1085,11 +1092,11 @@ function ItemsPanel({
                         <DropdownMenuGroup>
                           <DropdownMenuItem onClick={() => { setEditingItem(item); setSheetOpen(true); }}>
                             <Edit className="h-3.5 w-3.5" />
-                            Edit
+                            {t.dashEdit}
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDuplicate(item)}>
                             <Copy className="h-3.5 w-3.5" />
-                            Duplicate
+                            {t.mnu_duplicate}
                           </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
@@ -1099,7 +1106,7 @@ function ItemsPanel({
                             onClick={() => setDeleteState({ open: true, item })}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
-                            Delete
+                            {t.dashDelete}
                           </DropdownMenuItem>
                         </DropdownMenuGroup>
                       </DropdownMenuContent>
@@ -1126,8 +1133,8 @@ function ItemsPanel({
       <DeleteConfirmDialog
         open={deleteState.open}
         onOpenChange={(v) => setDeleteState((s) => ({ ...s, open: v }))}
-        title="Delete item"
-        description={`Are you sure you want to delete "${deleteState.item?.name}"?`}
+        title={t.mnu_deleteItem}
+        description={t.mnu_cannotUndo}
         onConfirm={() => deleteState.item && handleDelete(deleteState.item)}
       />
     </div>
@@ -1137,6 +1144,7 @@ function ItemsPanel({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function MenuPage() {
+  const t = useT();
   const [menus, setMenus]           = useState<Menu[]>(mockMenus);
   const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [items, setItems]           = useState<Item[]>(mockItems);
@@ -1193,8 +1201,8 @@ export default function MenuPage() {
       {/* Page header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
         <div>
-          <h1 className="text-lg font-semibold">Menu Management</h1>
-          <p className="text-xs text-muted-foreground">Manage your menus, categories, and items</p>
+          <h1 className="text-lg font-semibold">{t.mnu_pageTitle}</h1>
+          <p className="text-xs text-muted-foreground">{t.mnu_pageSubtitle}</p>
         </div>
       </div>
 
@@ -1233,9 +1241,9 @@ export default function MenuPage() {
       <div className="md:hidden flex-1 overflow-hidden">
         <Tabs defaultValue="menus" className="h-full">
           <TabsList variant="default" className="w-full rounded-none border-b border-border h-10">
-            <TabsTrigger value="menus" className="flex-1">Menus</TabsTrigger>
-            <TabsTrigger value="categories" className="flex-1">Categories</TabsTrigger>
-            <TabsTrigger value="items" className="flex-1">Items</TabsTrigger>
+            <TabsTrigger value="menus" className="flex-1">{t.mnu_menusSection}</TabsTrigger>
+            <TabsTrigger value="categories" className="flex-1">{t.mnu_categoriesSection}</TabsTrigger>
+            <TabsTrigger value="items" className="flex-1">{t.mnu_itemsSection}</TabsTrigger>
           </TabsList>
           <TabsContent value="menus" className="h-[calc(100%-2.5rem)] overflow-hidden">
             <MenusPanel

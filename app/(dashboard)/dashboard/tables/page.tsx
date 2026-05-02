@@ -20,6 +20,7 @@ import {
 import { mockBranches } from "@/mock/tenant";
 import type { RestaurantTable } from "@/types";
 import { cn, generateId } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,13 +69,7 @@ const STATUS_COLORS: Record<TableStatus, string> = {
     "bg-red-100 border-red-300 text-red-800 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300 animate-pulse",
 };
 
-const STATUS_LABELS: Record<TableStatus, string> = {
-  free: "Free",
-  occupied: "Occupied",
-  ready: "Ready",
-  bill_requested: "Bill Requested",
-  aging: "Aging",
-};
+// STATUS_LABELS is now built from translations inside components that call useT()
 
 // ─── Mock data ─────────────────────────────────────────────────────────────────
 
@@ -119,12 +114,13 @@ const MOCK_PAST_ORDERS = [
 // ─── Status legend ─────────────────────────────────────────────────────────────
 
 function StatusLegend() {
+  const t = useT();
   const entries: { status: TableStatus; label: string }[] = [
-    { status: "free", label: "Free" },
-    { status: "occupied", label: "Occupied" },
-    { status: "bill_requested", label: "Bill Requested" },
-    { status: "ready", label: "Ready / Food served" },
-    { status: "aging", label: "Aging" },
+    { status: "free",           label: t.tbl_statusFree },
+    { status: "occupied",       label: t.tbl_statusOccupied },
+    { status: "bill_requested", label: t.tbl_statusBillRequested },
+    { status: "ready",          label: t.tbl_statusReadyServed },
+    { status: "aging",          label: t.tbl_statusAging },
   ];
 
   return (
@@ -155,6 +151,11 @@ function TableCard({
   onClick: (table: RestaurantTable) => void;
   large?: boolean;
 }) {
+  const t = useT();
+  const STATUS_LABELS: Record<TableStatus, string> = {
+    free: t.tbl_statusFree, occupied: t.tbl_statusOccupied, ready: t.tbl_statusReady,
+    bill_requested: t.tbl_statusBillRequested, aging: t.tbl_statusAging,
+  };
   return (
     <button
       type="button"
@@ -175,7 +176,7 @@ function TableCard({
       </span>
       {table.capacity !== undefined && (
         <span className="mt-1.5 text-xs opacity-70">
-          {table.capacity} {table.capacity === 1 ? "seat" : "seats"}
+          {table.capacity} {table.capacity === 1 ? t.tbl_seat : t.tbl_seats}
         </span>
       )}
       <span
@@ -203,6 +204,7 @@ function AddTableDialog({
   editTable: RestaurantTable | null;
   onSave: (values: TableFormValues, id?: string) => void;
 }) {
+  const t = useT();
   const [saving, setSaving] = useState(false);
 
   const {
@@ -242,18 +244,16 @@ function AddTableDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit table" : "Add table"}</DialogTitle>
+          <DialogTitle>{isEdit ? t.tbl_editTableTitle : t.tbl_addTableTitle}</DialogTitle>
           <DialogDescription>
-            {isEdit
-              ? "Update the table details below."
-              : "Enter the details for the new table."}
+            {isEdit ? t.tbl_editTableDesc : t.tbl_addTableDesc}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Table number */}
           <div className="space-y-1.5">
-            <Label htmlFor="table-number">Table number</Label>
+            <Label htmlFor="table-number">{t.tbl_tableNumber}</Label>
             <Input
               id="table-number"
               placeholder="e.g. T-13"
@@ -267,7 +267,7 @@ function AddTableDialog({
 
           {/* Capacity */}
           <div className="space-y-1.5">
-            <Label htmlFor="table-capacity">Capacity</Label>
+            <Label htmlFor="table-capacity">{t.tbl_capacity}</Label>
             <Input
               id="table-capacity"
               type="number"
@@ -285,14 +285,14 @@ function AddTableDialog({
 
           {/* Branch */}
           <div className="space-y-1.5">
-            <Label>Branch</Label>
+            <Label>{t.tbl_branch}</Label>
             <Controller
               control={control}
               name="branch_id"
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select branch" />
+                    <SelectValue placeholder={t.tbl_selectBranch} />
                   </SelectTrigger>
                   <SelectContent>
                     {mockBranches.map((b) => (
@@ -313,10 +313,10 @@ function AddTableDialog({
 
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" disabled={saving} />}>
-              Cancel
+              {t.dashCancel}
             </DialogClose>
             <Button type="submit" disabled={saving}>
-              {saving ? "Saving…" : isEdit ? "Save changes" : "Add table"}
+              {saving ? t.tbl_saving : isEdit ? t.tbl_saveChanges : t.tbl_addTable}
             </Button>
           </DialogFooter>
         </form>
@@ -338,20 +338,21 @@ function DeleteTableDialog({
   table: RestaurantTable | null;
   onConfirm: () => void;
 }) {
+  const t = useT();
   if (!table) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Delete Table {table.number}?</DialogTitle>
+          <DialogTitle>{t.tbl_deleteTable} {table.number}?</DialogTitle>
           <DialogDescription>
-            This will also remove its QR code. This action cannot be undone.
+            {t.tbl_deleteConfirmDesc}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose render={<Button type="button" variant="outline" />}>
-            Cancel
+            {t.dashCancel}
           </DialogClose>
           <Button
             type="button"
@@ -361,7 +362,7 @@ function DeleteTableDialog({
               onOpenChange(false);
             }}
           >
-            Delete table
+            {t.tbl_deleteTable}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -386,6 +387,11 @@ function TableDetailSheet({
   onEdit: (table: RestaurantTable) => void;
   onDeleteRequest: (table: RestaurantTable) => void;
 }) {
+  const t = useT();
+  const STATUS_LABELS: Record<TableStatus, string> = {
+    free: t.tbl_statusFree, occupied: t.tbl_statusOccupied, ready: t.tbl_statusReady,
+    bill_requested: t.tbl_statusBillRequested, aging: t.tbl_statusAging,
+  };
   if (!table) return null;
 
   const isActive =
@@ -398,14 +404,14 @@ function TableDetailSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader className="pb-0">
-          <SheetTitle>Table {table.number}</SheetTitle>
+          <SheetTitle>{t.tbl_tableDetail} {table.number}</SheetTitle>
         </SheetHeader>
 
         <div className="px-4 pb-6 space-y-5">
           {/* ── Status ── */}
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Status
+              {t.tbl_statusSection}
             </p>
             <span
               className={cn(
@@ -419,40 +425,23 @@ function TableDetailSheet({
             {/* Action buttons */}
             <div className="flex flex-wrap gap-2">
               {table.status === "free" && (
-                <Button
-                  size="sm"
-                  onClick={() => onStatusChange(table.id, "occupied")}
-                >
-                  Mark Occupied
+                <Button size="sm" onClick={() => onStatusChange(table.id, "occupied")}>
+                  {t.tbl_markOccupied}
                 </Button>
               )}
               {table.status === "occupied" && (
                 <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onStatusChange(table.id, "ready")}
-                  >
-                    Mark Ready
+                  <Button size="sm" variant="outline" onClick={() => onStatusChange(table.id, "ready")}>
+                    {t.tbl_markReady}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onStatusChange(table.id, "bill_requested")}
-                  >
-                    Request Bill
+                  <Button size="sm" variant="outline" onClick={() => onStatusChange(table.id, "bill_requested")}>
+                    {t.tbl_requestBill}
                   </Button>
                 </>
               )}
-              {(table.status === "ready" ||
-                table.status === "bill_requested" ||
-                table.status === "aging") && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onStatusChange(table.id, "free")}
-                >
-                  Mark Free
+              {(table.status === "ready" || table.status === "bill_requested" || table.status === "aging") && (
+                <Button size="sm" variant="outline" onClick={() => onStatusChange(table.id, "free")}>
+                  {t.tbl_markFree}
                 </Button>
               )}
             </div>
@@ -465,7 +454,7 @@ function TableDetailSheet({
             <>
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Current session
+                  {t.tbl_currentSession}
                 </p>
                 <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
                   <div className="flex items-center justify-between gap-2">
@@ -487,7 +476,7 @@ function TableDetailSheet({
                     className="flex items-center gap-1 text-xs text-primary hover:underline"
                     onClick={() => toast.info("Opening order #042…")}
                   >
-                    View order
+                    {t.tbl_viewOrder}
                     <ExternalLink className="size-3" />
                   </button>
                 </div>
@@ -499,7 +488,7 @@ function TableDetailSheet({
           {/* ── Past orders ── */}
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Past orders
+              {t.tbl_pastOrders}
             </p>
             <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
               {MOCK_PAST_ORDERS.map((order) => (
@@ -529,17 +518,17 @@ function TableDetailSheet({
           {/* ── Actions ── */}
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Actions
+              {t.tbl_actionsSection}
             </p>
             <div className="flex flex-col gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 className="justify-start"
-                onClick={() => toast.info("Printing QR code…")}
+                onClick={() => toast.info(t.tbl_printQr)}
               >
                 <Printer className="size-4" />
-                Print QR code
+                {t.tbl_printQr}
               </Button>
               <Button
                 variant="outline"
@@ -551,7 +540,7 @@ function TableDetailSheet({
                 }}
               >
                 <Pencil className="size-4" />
-                Edit table
+                {t.tbl_editTable}
               </Button>
               <Button
                 variant="destructive"
@@ -563,7 +552,7 @@ function TableDetailSheet({
                 }}
               >
                 <Trash2 className="size-4" />
-                Delete table
+                {t.tbl_deleteTable}
               </Button>
             </div>
           </div>
@@ -576,6 +565,11 @@ function TableDetailSheet({
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function TablesPage() {
+  const t = useT();
+  const STATUS_LABELS: Record<TableStatus, string> = {
+    free: t.tbl_statusFree, occupied: t.tbl_statusOccupied, ready: t.tbl_statusReady,
+    bill_requested: t.tbl_statusBillRequested, aging: t.tbl_statusAging,
+  };
   const [tables, setTables] = useState<RestaurantTable[]>(INITIAL_TABLES);
   const [selectedBranchId, setSelectedBranchId] = useState<string>("b1");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -616,9 +610,7 @@ export default function TablesPage() {
     setSelectedTable((prev) =>
       prev?.id === id ? { ...prev, status } : prev
     );
-    toast.success(
-      `Table updated to ${STATUS_LABELS[status]}`
-    );
+    toast.success(`${t.tbl_tableUpdated}: ${STATUS_LABELS[status]}`);
   }
 
   function handleSaveTable(values: TableFormValues, id?: string) {
@@ -637,7 +629,7 @@ export default function TablesPage() {
             : t
         )
       );
-      toast.success("Table updated");
+      toast.success(t.tbl_tableUpdated);
     } else {
       // Add
       const newTable: RestaurantTable = {
@@ -650,7 +642,7 @@ export default function TablesPage() {
         status: "free",
       };
       setTables((prev) => [...prev, newTable]);
-      toast.success("Table added");
+      toast.success(t.tbl_tableAdded);
     }
     setEditTable(null);
   }
@@ -662,7 +654,7 @@ export default function TablesPage() {
 
   function handleDeleteRequest(table: RestaurantTable) {
     if (table.status !== "free") {
-      toast.error("Cannot delete a table with an active session");
+      toast.error(t.tbl_cannotDeleteActive);
       return;
     }
     setDeletingTable(table);
@@ -682,7 +674,7 @@ export default function TablesPage() {
     <div className="space-y-6 max-w-6xl">
       {/* ── Page header ── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold tracking-tight">Tables</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t.tbl_pageTitle}</h1>
 
         <div className="flex items-center gap-2 flex-wrap">
           {/* Branch selector */}
@@ -691,7 +683,7 @@ export default function TablesPage() {
             onValueChange={(v) => { if (v !== null) setSelectedBranchId(v); }}
           >
             <SelectTrigger className="w-36">
-              <SelectValue placeholder="Select branch" />
+              <SelectValue placeholder={t.tbl_selectBranch} />
             </SelectTrigger>
             <SelectContent>
               {mockBranches.map((b) => (
@@ -740,7 +732,7 @@ export default function TablesPage() {
             }}
           >
             <Plus className="size-4" />
-            Add table
+            {t.tbl_addTable}
           </Button>
         </div>
       </div>
@@ -758,7 +750,7 @@ export default function TablesPage() {
             <div className="col-span-full flex flex-col items-center gap-3 py-16 text-center">
               <LayoutGrid className="size-10 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">
-                No tables for this branch yet.
+                {t.tbl_noTablesYet}
               </p>
               <Button
                 size="sm"
@@ -769,7 +761,7 @@ export default function TablesPage() {
                 }}
               >
                 <Plus className="size-4" />
-                Add your first table
+                {t.tbl_addFirstTable}
               </Button>
             </div>
           )}

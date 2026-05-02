@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -103,6 +104,7 @@ const RTL_LANGS = ["ar", "ur", "fa", "he"];
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function MenuTranslatorPage() {
+  const t = useT();
   const [activeLangs, setActiveLangs] = useState<ActiveLanguage[]>(ACTIVE_LANGS_INITIAL);
   const [showAddDropdown, setShowAddDropdown] = useState(false);
 
@@ -179,7 +181,7 @@ export default function MenuTranslatorPage() {
 
   const handleApproveAll = () => {
     setTranslationRows((prev) => prev.map((r) => ({ ...r, approved: true })));
-    toast.success("All translations approved");
+    toast.success(t.mtr_allApproved);
   };
 
   const handleApproveRow = (itemId: string) => {
@@ -212,15 +214,15 @@ export default function MenuTranslatorPage() {
               <Languages className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">AI Menu Translator</h1>
-              <p className="text-sm text-muted-foreground">Translate your menu into any language</p>
+              <h1 className="text-xl font-bold">{t.mtr_pageTitle}</h1>
+              <p className="text-sm text-muted-foreground">{t.mtr_pageSubtitle}</p>
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:items-end">
             <Badge variant="default" className="w-fit">
               Pro
             </Badge>
-            <p className="text-xs text-muted-foreground">847 / 2,000 translations used this month</p>
+            <p className="text-xs text-muted-foreground">847 / 2,000 {t.mtr_translationsUsed}</p>
             <div className="w-48">
               <div className="relative flex h-1.5 w-full overflow-hidden rounded-full bg-muted">
                 <div
@@ -235,7 +237,7 @@ export default function MenuTranslatorPage() {
         {/* ── Active languages ── */}
         <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold">Active languages</h2>
+            <h2 className="font-semibold">{t.mtr_activeLanguages}</h2>
             <div className="relative">
               <Button
                 variant="outline"
@@ -244,7 +246,7 @@ export default function MenuTranslatorPage() {
                 onClick={() => setShowAddDropdown((v) => !v)}
               >
                 <Plus className="h-3.5 w-3.5" />
-                Add language
+                {t.mtr_addLanguage}
                 <ChevronDown className="h-3.5 w-3.5" />
               </Button>
               <AnimatePresence>
@@ -258,7 +260,7 @@ export default function MenuTranslatorPage() {
                   >
                     {inactiveLangs.length === 0 ? (
                       <p className="px-3 py-4 text-center text-xs text-muted-foreground">
-                        All languages added
+                        {t.mtr_allLangsAdded}
                       </p>
                     ) : (
                       inactiveLangs.map((lang) => (
@@ -290,8 +292,8 @@ export default function MenuTranslatorPage() {
                     <p className="text-sm font-medium">{lang.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {lang.itemCount === 0
-                        ? "No items translated"
-                        : `${lang.itemCount} item${lang.itemCount === 1 ? "" : "s"} translated`}
+                        ? t.mtr_noItemsTranslated
+                        : `${lang.itemCount} ${lang.itemCount === 1 ? t.mtr_itemTranslated : t.mtr_itemsTranslated}`}
                     </p>
                   </div>
                 </div>
@@ -306,7 +308,7 @@ export default function MenuTranslatorPage() {
                     <span className="sr-only">Remove {lang.name}</span>
                   </Button>
                 ) : (
-                  <Badge variant="secondary" className="text-[10px]">Default</Badge>
+                  <Badge variant="secondary" className="text-[10px]">{t.mtr_defaultBadge}</Badge>
                 )}
               </div>
             ))}
@@ -315,10 +317,10 @@ export default function MenuTranslatorPage() {
 
         {/* ── Bulk translate ── */}
         <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
-          <h2 className="font-semibold">Bulk translate</h2>
+          <h2 className="font-semibold">{t.mtr_bulkTranslate}</h2>
 
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm text-muted-foreground">Translate all untranslated items to:</span>
+            <span className="text-sm text-muted-foreground">{t.mtr_translateAllTo}</span>
             <Select
               value={bulkTarget}
               onValueChange={(v) => {
@@ -349,11 +351,11 @@ export default function MenuTranslatorPage() {
               {translating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Translating…
+                  {t.mtr_translating}
                 </>
               ) : (
                 <>
-                  Translate {MOCK_ITEMS.length} items →
+                  {MOCK_ITEMS.length} {t.mtr_translateItems}
                 </>
               )}
             </Button>
@@ -370,13 +372,13 @@ export default function MenuTranslatorPage() {
               >
                 {translating && (
                   <p className="text-sm text-muted-foreground">
-                    Translating {MOCK_ITEMS.length} items to {targetLangMeta?.name ?? bulkTarget}…
+                    {t.mtr_translatingProgress} {targetLangMeta?.name ?? bulkTarget}…
                   </p>
                 )}
                 {translationDone && (
                   <p className="flex items-center gap-1.5 text-sm font-medium text-green-600 dark:text-green-400">
                     <Check className="h-4 w-4" />
-                    {MOCK_ITEMS.length} items translated! Review below.
+                    {MOCK_ITEMS.length} {t.mtr_translationDone}
                   </p>
                 )}
                 <div className="relative flex h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -403,9 +405,8 @@ export default function MenuTranslatorPage() {
               className="rounded-2xl border border-border bg-card p-5 space-y-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="font-semibold">Review translations</h2>
+                <h2 className="font-semibold">{t.mtr_reviewTranslations}</h2>
                 <div className="flex items-center gap-3">
-                  {/* RTL preview toggle */}
                   {showRtlToggle && (
                     <div className="flex items-center gap-2">
                       <Switch
@@ -415,7 +416,7 @@ export default function MenuTranslatorPage() {
                         size="sm"
                       />
                       <Label htmlFor="rtl-toggle" className="text-xs cursor-pointer">
-                        Preview RTL
+                        {t.mtr_previewRtl}
                       </Label>
                     </div>
                   )}
@@ -426,7 +427,7 @@ export default function MenuTranslatorPage() {
                     onClick={handleApproveAll}
                   >
                     <Check className="h-3.5 w-3.5" />
-                    Approve all
+                    {t.mtr_approveAll}
                   </Button>
                 </div>
               </div>
@@ -434,7 +435,7 @@ export default function MenuTranslatorPage() {
               {/* Column headers */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-1">
-                  Original (English)
+                  {t.mtr_originalEnglish}
                 </div>
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground px-1">
                   {targetLangMeta?.flag} {targetLangMeta?.name ?? bulkTarget}
@@ -468,13 +469,13 @@ export default function MenuTranslatorPage() {
                           value={row.name}
                           onChange={(e) => handleRowChange(row.itemId, "name", e.target.value)}
                           className="h-7 text-sm"
-                          placeholder="Translated name"
+                          placeholder={t.mtr_translatedName}
                         />
                         <Textarea
                           value={row.description}
                           onChange={(e) => handleRowChange(row.itemId, "description", e.target.value)}
                           className="min-h-12 text-xs"
-                          placeholder="Translated description"
+                          placeholder={t.mtr_translatedDesc}
                         />
                         {!row.approved && (
                           <Button
@@ -484,13 +485,13 @@ export default function MenuTranslatorPage() {
                             onClick={() => handleApproveRow(row.itemId)}
                           >
                             <Check className="h-3 w-3" />
-                            Approve
+                            {t.mtr_approve}
                           </Button>
                         )}
                         {row.approved && (
                           <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                             <Check className="h-3 w-3" />
-                            Approved
+                            {t.mtr_approved}
                           </span>
                         )}
                       </div>

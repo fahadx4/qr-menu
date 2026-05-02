@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import { cn, formatPrice, generateId } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -170,12 +171,14 @@ const DRIVER_STATUS_COLORS: Record<DriverStatus, string> = {
   offline:     "bg-zinc-100  text-zinc-600   dark:bg-zinc-800     dark:text-zinc-400",
 };
 
-const DRIVER_STATUS_LABELS: Record<DriverStatus, string> = {
-  available:   "Available",
-  on_delivery: "On delivery",
-  break:       "On break",
-  offline:     "Offline",
-};
+function getDriverStatusLabels(t: ReturnType<typeof useT>): Record<DriverStatus, string> {
+  return {
+    available:   t.dlv_statAvailable,
+    on_delivery: t.dlv_statOnDelivery,
+    break:       t.dlv_statOnBreak,
+    offline:     t.dlv_statOffline,
+  };
+}
 
 const VEHICLE_ICONS: Record<string, string> = {
   Motorcycle: "🏍",
@@ -189,15 +192,17 @@ function ratingColor(r: number): string {
   return "text-red-600 dark:text-red-400";
 }
 
-const DELIVERY_STEPS: { key: ActiveDelivery["status"]; label: string }[] = [
-  { key: "assigned",         label: "Assigned" },
-  { key: "picked_up",        label: "Picked up" },
-  { key: "near_destination", label: "Near destination" },
-  { key: "delivered",        label: "Delivered" },
-];
+function getDeliverySteps(t: ReturnType<typeof useT>): { key: ActiveDelivery["status"]; label: string }[] {
+  return [
+    { key: "assigned",         label: t.dlv_stepAssigned },
+    { key: "picked_up",        label: t.dlv_stepPickedUp },
+    { key: "near_destination", label: t.dlv_stepNearDest },
+    { key: "delivered",        label: t.dlv_stepDelivered },
+  ];
+}
 
-function stepIndex(status: ActiveDelivery["status"]): number {
-  return DELIVERY_STEPS.findIndex((s) => s.key === status);
+function stepIndex(status: ActiveDelivery["status"], steps: { key: string }[]): number {
+  return steps.findIndex((s) => s.key === status);
 }
 
 // ─── Zone Dialog ──────────────────────────────────────────────────────────────
@@ -213,6 +218,7 @@ function ZoneDialog({
   zone?: DeliveryZone;
   onSave: (values: ZoneFormValues) => void;
 }) {
+  const t = useT();
   const {
     register,
     handleSubmit,
@@ -243,22 +249,20 @@ function ZoneDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{zone ? "Edit zone" : "Add delivery zone"}</DialogTitle>
-          <DialogDescription>
-            Configure a delivery radius and its fee structure.
-          </DialogDescription>
+          <DialogTitle>{zone ? t.dlv_editZoneTitle : t.dlv_addZoneTitle}</DialogTitle>
+          <DialogDescription>{t.dlv_zoneDialogDesc}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {/* Name */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="zone-name">Zone name</Label>
+            <Label htmlFor="zone-name">{t.dlv_zoneName}</Label>
             <Input id="zone-name" placeholder="e.g. Downtown (0-2km)" {...register("name")} />
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
           </div>
 
           {/* Radius */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="zone-radius">Radius (km)</Label>
+            <Label htmlFor="zone-radius">{t.dlv_radius}</Label>
             <Input id="zone-radius" type="number" step="0.1" placeholder="5" {...register("radius_km")} />
             {errors.radius_km && <p className="text-xs text-destructive">{errors.radius_km.message}</p>}
           </div>
@@ -266,12 +270,12 @@ function ZoneDialog({
           {/* Min order + fee */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="zone-min">Min order ($)</Label>
+              <Label htmlFor="zone-min">{t.dlv_minOrderDollar}</Label>
               <Input id="zone-min" type="number" step="0.01" placeholder="10.00" {...register("min_order")} />
               {errors.min_order && <p className="text-xs text-destructive">{errors.min_order.message}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="zone-fee">Delivery fee ($)</Label>
+              <Label htmlFor="zone-fee">{t.dlv_deliveryFeeDollar}</Label>
               <Input id="zone-fee" type="number" step="0.01" placeholder="2.99" {...register("delivery_fee")} />
               {errors.delivery_fee && <p className="text-xs text-destructive">{errors.delivery_fee.message}</p>}
             </div>
@@ -279,19 +283,19 @@ function ZoneDialog({
 
           {/* Fee type */}
           <div className="flex flex-col gap-1.5">
-            <Label>Fee type</Label>
+            <Label>{t.dlv_feeType}</Label>
             <Controller
               name="fee_type"
               control={control}
               render={({ field }) => (
                 <Select value={field.value} onValueChange={(v) => field.onChange(v as ZoneFeeType)}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select fee type" />
+                    <SelectValue placeholder={t.dlv_feeType} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="flat">Flat rate</SelectItem>
-                    <SelectItem value="per_km">Per km</SelectItem>
-                    <SelectItem value="tiered">Tiered</SelectItem>
+                    <SelectItem value="flat">{t.dlv_flatRate}</SelectItem>
+                    <SelectItem value="per_km">{t.dlv_perKm}</SelectItem>
+                    <SelectItem value="tiered">{t.dlv_tiered}</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -301,13 +305,13 @@ function ZoneDialog({
 
           {/* Estimated time */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="zone-time">Estimated delivery time (min)</Label>
+            <Label htmlFor="zone-time">{t.dlv_estimatedTime}</Label>
             <Input id="zone-time" type="number" placeholder="30" {...register("estimated_time")} />
             {errors.estimated_time && <p className="text-xs text-destructive">{errors.estimated_time.message}</p>}
           </div>
 
           <DialogFooter showCloseButton>
-            <Button type="submit">{zone ? "Save changes" : "Add zone"}</Button>
+            <Button type="submit">{zone ? t.tbl_saveChanges : t.dlv_addZone}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -326,6 +330,7 @@ function AddDriverDialog({
   onOpenChange: (v: boolean) => void;
   onAdd: (values: DriverFormValues) => void;
 }) {
+  const t = useT();
   const {
     register,
     handleSubmit,
@@ -347,24 +352,24 @@ function AddDriverDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Add driver</DialogTitle>
-          <DialogDescription>Register a new delivery driver.</DialogDescription>
+          <DialogTitle>{t.dlv_addDriverTitle}</DialogTitle>
+          <DialogDescription>{t.dlv_addDriverDesc}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="driver-name">Full name</Label>
+            <Label htmlFor="driver-name">{t.dlv_fullName}</Label>
             <Input id="driver-name" placeholder="Marco Rossi" {...register("name")} />
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="driver-phone">Phone</Label>
+            <Label htmlFor="driver-phone">{t.phoneNumber}</Label>
             <Input id="driver-phone" placeholder="+1 555 0000" {...register("phone")} />
             {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label>Vehicle type</Label>
+            <Label>{t.dlv_vehicleType}</Label>
             <Controller
               name="vehicle"
               control={control}
@@ -384,7 +389,7 @@ function AddDriverDialog({
           </div>
 
           <DialogFooter showCloseButton>
-            <Button type="submit">Add driver</Button>
+            <Button type="submit">{t.dlv_addDriver}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -395,6 +400,7 @@ function AddDriverDialog({
 // ─── Delivery Zones Tab ───────────────────────────────────────────────────────
 
 function DeliveryZonesTab() {
+  const t = useT();
   const [zones, setZones] = useState<DeliveryZone[]>(mockZones);
   const [addOpen, setAddOpen] = useState(false);
   const [editZone, setEditZone] = useState<DeliveryZone | undefined>(undefined);
@@ -407,7 +413,7 @@ function DeliveryZonesTab() {
 
   function handleDelete(id: string) {
     setZones((prev) => prev.filter((z) => z.id !== id));
-    toast.success("Zone removed");
+    toast.success(t.dlv_toastZoneRemoved);
   }
 
   function handleSave(values: ZoneFormValues) {
@@ -431,7 +437,7 @@ function DeliveryZonesTab() {
             : z
         )
       );
-      toast.success("Zone updated");
+      toast.success(t.dlv_toastZoneUpdated);
     } else {
       const newZone: DeliveryZone = {
         id: generateId(),
@@ -444,7 +450,7 @@ function DeliveryZonesTab() {
         active: true,
       };
       setZones((prev) => [...prev, newZone]);
-      toast.success("Zone added");
+      toast.success(t.dlv_toastZoneAdded);
     }
     setEditZone(undefined);
   }
@@ -454,12 +460,11 @@ function DeliveryZonesTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-lg font-semibold">Delivery Zones</h2>
-          <p className="text-sm text-muted-foreground">{zones.length} zones configured</p>
+          <h2 className="font-heading text-lg font-semibold">{t.dlv_zonesTitle}</h2>
+          <p className="text-sm text-muted-foreground">{zones.length} {t.dlv_zonesCount}</p>
         </div>
         <Button size="sm" onClick={() => { setEditZone(undefined); setAddOpen(true); }}>
-          <Plus className="h-4 w-4 mr-1.5" />
-          Add zone
+          <Plus className="h-4 w-4 me-1.5" />{t.dlv_addZone}
         </Button>
       </div>
 
@@ -479,8 +484,8 @@ function DeliveryZonesTab() {
           <text x="238" y="90"  fontSize="9" fill="#7C3AED" opacity="0.6">2-5km</text>
           <text x="255" y="65"  fontSize="9" fill="#7C3AED" opacity="0.4">5-10km</text>
         </svg>
-        <div className="absolute bottom-2 right-2 text-[10px] text-muted-foreground bg-background/80 px-2 py-1 rounded">
-          Map view · Interactive map coming soon
+        <div className="absolute bottom-2 end-2 text-[10px] text-muted-foreground bg-background/80 px-2 py-1 rounded">
+          {t.dlv_mapPlaceholder}
         </div>
       </div>
 
@@ -493,7 +498,7 @@ function DeliveryZonesTab() {
                 <div className="flex flex-col gap-0.5">
                   <span className="font-medium text-sm">{zone.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    Up to {zone.radius_km} km · {zone.fee_type === "flat" ? "Flat fee" : zone.fee_type === "per_km" ? "Per km" : "Tiered"}
+                    {t.dlv_upTo} {zone.radius_km} {t.dlv_km} · {zone.fee_type === "flat" ? t.dlv_flatFee : zone.fee_type === "per_km" ? t.dlv_perKm : t.dlv_tiered}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
@@ -512,21 +517,13 @@ function DeliveryZonesTab() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuGroup>
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setEditZone(zone);
-                            setAddOpen(true);
-                          }}
-                        >
-                          Edit zone
+                        <DropdownMenuLabel>{t.dashActions}</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => { setEditZone(zone); setAddOpen(true); }}>
+                          {t.dlv_editZone}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onClick={() => handleDelete(zone.id)}
-                        >
-                          Delete zone
+                        <DropdownMenuItem variant="destructive" onClick={() => handleDelete(zone.id)}>
+                          {t.dlv_deleteZone}
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
@@ -538,17 +535,17 @@ function DeliveryZonesTab() {
 
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-muted-foreground">Min order</span>
+                  <span className="text-muted-foreground">{t.dlv_minOrder}</span>
                   <span className="font-medium">{formatPrice(zone.min_order)}</span>
                 </div>
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-muted-foreground">Delivery fee</span>
+                  <span className="text-muted-foreground">{t.dlv_deliveryFee}</span>
                   <span className="font-medium">{formatPrice(zone.delivery_fee)}</span>
                 </div>
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-muted-foreground">Est. time</span>
+                  <span className="text-muted-foreground">{t.dlv_estTime}</span>
                   <span className="font-medium flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> {zone.estimated_time} min
+                    <Clock className="h-3 w-3" /> {zone.estimated_time} {t.dlv_min}
                   </span>
                 </div>
               </div>
@@ -574,6 +571,8 @@ function DeliveryZonesTab() {
 // ─── Drivers Tab ──────────────────────────────────────────────────────────────
 
 function DriversTab() {
+  const t = useT();
+  const DRIVER_STATUS_LABELS = getDriverStatusLabels(t);
   const [drivers, setDrivers] = useState<Driver[]>(mockDrivers);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -617,12 +616,11 @@ function DriversTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-lg font-semibold">Drivers</h2>
-          <p className="text-sm text-muted-foreground">{drivers.length} registered drivers</p>
+          <h2 className="font-heading text-lg font-semibold">{t.dlv_driversTitle}</h2>
+          <p className="text-sm text-muted-foreground">{drivers.length} {t.dlv_driversCount}</p>
         </div>
         <Button size="sm" onClick={() => setAddOpen(true)}>
-          <Plus className="h-4 w-4 mr-1.5" />
-          Add driver
+          <Plus className="h-4 w-4 me-1.5" />{t.dlv_addDriver}
         </Button>
       </div>
 
@@ -631,31 +629,31 @@ function DriversTab() {
         <Card size="sm">
           <CardContent className="flex flex-col items-center gap-1 py-3">
             <span className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.available}</span>
-            <span className="text-xs text-muted-foreground">Available</span>
+            <span className="text-xs text-muted-foreground">{t.dlv_statAvailable}</span>
           </CardContent>
         </Card>
         <Card size="sm">
           <CardContent className="flex flex-col items-center gap-1 py-3">
             <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.on_delivery}</span>
-            <span className="text-xs text-muted-foreground">On delivery</span>
+            <span className="text-xs text-muted-foreground">{t.dlv_statOnDelivery}</span>
           </CardContent>
         </Card>
         <Card size="sm">
           <CardContent className="flex flex-col items-center gap-1 py-3">
             <span className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.on_break}</span>
-            <span className="text-xs text-muted-foreground">On break</span>
+            <span className="text-xs text-muted-foreground">{t.dlv_statOnBreak}</span>
           </CardContent>
         </Card>
         <Card size="sm">
           <CardContent className="flex flex-col items-center gap-1 py-3">
             <span className="text-2xl font-bold text-zinc-600 dark:text-zinc-400">{stats.offline}</span>
-            <span className="text-xs text-muted-foreground">Offline</span>
+            <span className="text-xs text-muted-foreground">{t.dlv_statOffline}</span>
           </CardContent>
         </Card>
         <Card size="sm">
           <CardContent className="flex flex-col items-center gap-1 py-3">
             <span className="text-2xl font-bold text-foreground">{stats.deliveries}</span>
-            <span className="text-xs text-muted-foreground">Deliveries today</span>
+            <span className="text-xs text-muted-foreground">{t.dlv_statDeliveriesToday}</span>
           </CardContent>
         </Card>
       </div>
@@ -664,11 +662,11 @@ function DriversTab() {
       <div className="flex flex-col gap-2">
         {/* Table header — hidden on small screens */}
         <div className="hidden sm:grid sm:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-3 px-4 text-xs font-medium text-muted-foreground">
-          <span>Driver</span>
-          <span>Status</span>
-          <span>Phone</span>
-          <span>Del. today</span>
-          <span>Rating</span>
+          <span>{t.dlv_colDriver}</span>
+          <span>{t.dashStatus}</span>
+          <span>{t.phoneNumber}</span>
+          <span>{t.dlv_colDelToday}</span>
+          <span>{t.dlv_colRating}</span>
           <span />
         </div>
 
@@ -751,6 +749,7 @@ function DriverActions({
   onStatusChange: (id: string, status: DriverStatus) => void;
   onRemove: (id: string) => void;
 }) {
+  const t = useT();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -763,22 +762,22 @@ function DriverActions({
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
           <DropdownMenuLabel>{driver.name}</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => toast.info(`Viewing ${driver.name}'s history`)}>
-            View history
+          <DropdownMenuItem onClick={() => toast.info(`${t.dlv_viewHistory}: ${driver.name}`)}>
+            {t.dlv_viewHistory}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => toast.info(`Assigning order to ${driver.name}...`)}>
-            Assign order
+          <DropdownMenuItem onClick={() => toast.info(`${t.dlv_assignOrder}: ${driver.name}`)}>
+            {t.dlv_assignOrder}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => onStatusChange(driver.id, "break")}>
-            Mark on break
+            {t.dlv_markOnBreak}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onStatusChange(driver.id, "offline")}>
-            Mark offline
+            {t.dlv_markOffline}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" onClick={() => onRemove(driver.id)}>
-            Remove driver
+            {t.dlv_removeDriver}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
@@ -789,13 +788,14 @@ function DriverActions({
 // ─── Live Tracking Tab ────────────────────────────────────────────────────────
 
 function LiveTrackingTab() {
+  const t = useT();
   const [deliveries, setDeliveries] = useState<ActiveDelivery[]>(mockActiveDeliveries);
 
   function handleMarkDelivered(id: string) {
     setDeliveries((prev) =>
       prev.map((d) => (d.id === id ? { ...d, status: "delivered" } : d))
     );
-    toast.success("Order marked as delivered");
+    toast.success(t.dlv_toastMarkedDelivered);
   }
 
   function handleCallDriver(driverName: string) {
@@ -809,12 +809,11 @@ function LiveTrackingTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-lg font-semibold">Live Tracking</h2>
-          <p className="text-sm text-muted-foreground">{activeDeliveries.length} active deliveries</p>
+          <h2 className="font-heading text-lg font-semibold">{t.dlv_trackingTitle}</h2>
+          <p className="text-sm text-muted-foreground">{activeDeliveries.length} {t.dlv_activeDeliveries}</p>
         </div>
         <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-          <RefreshCw className="h-3 w-3" />
-          Updates every 30 seconds
+          <RefreshCw className="h-3 w-3" />{t.dlv_updatesEvery}
         </div>
       </div>
 
@@ -824,10 +823,8 @@ function LiveTrackingTab() {
             <Truck className="h-6 w-6 text-muted-foreground" />
           </div>
           <div className="flex flex-col gap-1">
-            <p className="font-medium text-sm">No active deliveries right now</p>
-            <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-              All orders have been delivered or there are no active deliveries at the moment.
-            </p>
+            <p className="font-medium text-sm">{t.dlv_noDeliveries}</p>
+            <p className="text-xs text-muted-foreground max-w-xs mx-auto">{t.dlv_noDeliveriesDesc}</p>
           </div>
         </div>
       ) : (
@@ -855,7 +852,9 @@ function DeliveryCard({
   onMarkDelivered: (id: string) => void;
   onCallDriver: (driverName: string) => void;
 }) {
-  const currentStep = stepIndex(delivery.status);
+  const t = useT();
+  const DELIVERY_STEPS = getDeliverySteps(t);
+  const currentStep = stepIndex(delivery.status, DELIVERY_STEPS);
 
   return (
     <Card>
@@ -875,13 +874,13 @@ function DeliveryCard({
               {VEHICLE_ICONS[mockDrivers.find((d) => d.id === delivery.driver_id)?.vehicle ?? ""] ?? "🚗"}
               <span>{delivery.driver_name}</span>
             </div>
-            <span className="text-xs font-semibold text-primary">ETA: {delivery.eta_minutes} min</span>
+            <span className="text-xs font-semibold text-primary">{t.dlv_eta} {delivery.eta_minutes} {t.dlv_min}</span>
           </div>
         </div>
 
         {/* Map placeholder */}
         <div className="h-24 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-xs text-muted-foreground">
-          <MapPin className="h-4 w-4 mr-1" /> Live map · Interactive tracking coming soon
+          <MapPin className="h-4 w-4 me-1" /> {t.dlv_liveMapPlaceholder}
         </div>
 
         <Separator />
@@ -939,26 +938,15 @@ function DeliveryCard({
             className="gap-1.5"
             onClick={() => onCallDriver(delivery.driver_name)}
           >
-            <Phone className="h-3.5 w-3.5" />
-            Call driver
+            <Phone className="h-3.5 w-3.5" />{t.dlv_callDriver}
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1.5"
-            onClick={() => toast.info(`Viewing order ${delivery.order_number}`)}
-          >
-            <Package className="h-3.5 w-3.5" />
-            View order
+          <Button size="sm" variant="outline" className="gap-1.5"
+            onClick={() => toast.info(`${t.dlv_viewOrder}: ${delivery.order_number}`)}>
+            <Package className="h-3.5 w-3.5" />{t.dlv_viewOrder}
           </Button>
           {delivery.status !== "delivered" && (
-            <Button
-              size="sm"
-              className="gap-1.5 ml-auto"
-              onClick={() => onMarkDelivered(delivery.id)}
-            >
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Mark delivered
+            <Button size="sm" className="gap-1.5 ms-auto" onClick={() => onMarkDelivered(delivery.id)}>
+              <CheckCircle2 className="h-3.5 w-3.5" />{t.dlv_markDelivered}
             </Button>
           )}
         </div>
@@ -970,6 +958,7 @@ function DeliveryCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DeliveryPage() {
+  const t = useT();
   return (
     <div className="flex flex-col gap-6 p-4 md:p-6 max-w-4xl mx-auto w-full">
       {/* Page header */}
@@ -978,8 +967,8 @@ export default function DeliveryPage() {
           <Truck className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="font-heading text-xl font-semibold">Delivery Management</h1>
-          <p className="text-sm text-muted-foreground">Manage zones, drivers, and track active deliveries</p>
+          <h1 className="font-heading text-xl font-semibold">{t.dlv_pageTitle}</h1>
+          <p className="text-sm text-muted-foreground">{t.dlv_pageSubtitle}</p>
         </div>
       </div>
 
@@ -987,16 +976,13 @@ export default function DeliveryPage() {
       <Tabs defaultValue="zones">
         <TabsList>
           <TabsTrigger value="zones">
-            <MapPin className="h-4 w-4" />
-            Delivery Zones
+            <MapPin className="h-4 w-4" />{t.dlv_tabZones}
           </TabsTrigger>
           <TabsTrigger value="drivers">
-            <Users className="h-4 w-4" />
-            Drivers
+            <Users className="h-4 w-4" />{t.dlv_tabDrivers}
           </TabsTrigger>
           <TabsTrigger value="tracking">
-            <Truck className="h-4 w-4" />
-            Live Tracking
+            <Truck className="h-4 w-4" />{t.dlv_tabTracking}
           </TabsTrigger>
         </TabsList>
 

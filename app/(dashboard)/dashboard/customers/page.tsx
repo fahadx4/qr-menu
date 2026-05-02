@@ -22,6 +22,7 @@ import {
 
 import type { Customer } from "@/types";
 import { cn, formatPrice, timeAgo } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -264,12 +265,12 @@ function getOrderHistory(customerId: string): MockOrder[] {
 
 type Segment = Customer["segment"];
 
-function segmentLabel(segment: Segment): string {
+function segmentLabel(segment: Segment, t: ReturnType<typeof useT>): string {
   const map: Record<Segment, string> = {
-    new: "New",
-    regular: "Regular",
+    new: t.new,
+    regular: t.cus_segmentRegular,
     vip: "VIP",
-    lapsed: "Lapsed",
+    lapsed: t.cus_segmentLapsed,
   };
   return map[segment];
 }
@@ -283,50 +284,17 @@ function segmentAvatarClass(segment: Segment): string {
   });
 }
 
-function SegmentBadge({ segment }: { segment: Segment }) {
-  if (segment === "vip") {
-    return (
-      <Badge className="bg-amber-100 text-amber-800 border-amber-200 gap-1">
-        <Star className="size-3 fill-amber-500 text-amber-500" />
-        VIP
-      </Badge>
-    );
-  }
-  if (segment === "regular") {
-    return (
-      <Badge className="bg-green-100 text-green-800 border-green-200">
-        Regular
-      </Badge>
-    );
-  }
-  if (segment === "new") {
-    return (
-      <Badge className="bg-blue-100 text-blue-800 border-blue-200">New</Badge>
-    );
-  }
-  return (
-    <Badge className="bg-zinc-100 text-zinc-600 border-zinc-200">Lapsed</Badge>
-  );
+function SegmentBadge({ segment, t }: { segment: Segment; t: ReturnType<typeof useT> }) {
+  if (segment === "vip") return <Badge className="bg-amber-100 text-amber-800 border-amber-200 gap-1"><Star className="size-3 fill-amber-500 text-amber-500" />VIP</Badge>;
+  if (segment === "regular") return <Badge className="bg-green-100 text-green-800 border-green-200">{t.cus_segmentRegular}</Badge>;
+  if (segment === "new") return <Badge className="bg-blue-100 text-blue-800 border-blue-200">{t.new}</Badge>;
+  return <Badge className="bg-zinc-100 text-zinc-600 border-zinc-200">{t.cus_segmentLapsed}</Badge>;
 }
 
-function OrderStatusBadge({ status }: { status: MockOrder["status"] }) {
-  if (status === "completed")
-    return (
-      <Badge className="bg-green-100 text-green-800 border-green-200">
-        Completed
-      </Badge>
-    );
-  if (status === "cancelled")
-    return (
-      <Badge className="bg-red-100 text-red-800 border-red-200">
-        Cancelled
-      </Badge>
-    );
-  return (
-    <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
-      Pending
-    </Badge>
-  );
+function OrderStatusBadge({ status, t }: { status: MockOrder["status"]; t: ReturnType<typeof useT> }) {
+  if (status === "completed") return <Badge className="bg-green-100 text-green-800 border-green-200">{t.completed}</Badge>;
+  if (status === "cancelled") return <Badge className="bg-red-100 text-red-800 border-red-200">{t.cancelled}</Badge>;
+  return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">{t.ord_statusPending}</Badge>;
 }
 
 /* ─────────────────────────────────────────────
@@ -355,17 +323,17 @@ function CustomerSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useT();
   const [note, setNote] = useState(customer?.notes ?? "");
   const [saving, setSaving] = useState(false);
 
-  // Sync note when customer changes
   const currentNote = customer?.notes ?? "";
 
   function handleSaveNote() {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      toast.success("Note saved");
+      toast.success(t.cus_saveNote);
     }, 600);
   }
 
@@ -403,7 +371,7 @@ function CustomerSheet({
                 <SheetTitle className="text-base font-semibold">
                   {customer.name ?? "Unknown"}
                 </SheetTitle>
-                <SegmentBadge segment={customer.segment} />
+                <SegmentBadge segment={customer.segment} t={t} />
               </div>
               <SheetDescription className="mt-1 space-y-0.5">
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -426,40 +394,36 @@ function CustomerSheet({
             variant="line"
             className="w-full rounded-none border-b px-6 h-10"
           >
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="orders">Order History</TabsTrigger>
-            <TabsTrigger value="notes">Notes</TabsTrigger>
+            <TabsTrigger value="overview">{t.cus_tabOverview}</TabsTrigger>
+            <TabsTrigger value="orders">{t.cus_tabOrders}</TabsTrigger>
+            <TabsTrigger value="notes">{t.cus_tabNotes}</TabsTrigger>
           </TabsList>
 
           {/* ── Overview ── */}
           <TabsContent value="overview" className="p-6 space-y-6">
-            {/* Stat row */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="rounded-lg border bg-muted/30 p-3 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Orders</p>
+                <p className="text-xs text-muted-foreground mb-1">{t.navOrders}</p>
                 <p className="text-xl font-semibold">{customer.order_count}</p>
               </div>
               <div className="rounded-lg border bg-muted/30 p-3 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Total spent</p>
-                <p className="text-lg font-semibold">
-                  {formatPrice(customer.total_spent)}
-                </p>
+                <p className="text-xs text-muted-foreground mb-1">{t.cus_colTotalSpent}</p>
+                <p className="text-lg font-semibold">{formatPrice(customer.total_spent)}</p>
               </div>
               <div className="rounded-lg border bg-muted/30 p-3 text-center">
-                <p className="text-xs text-muted-foreground mb-1">AOV</p>
+                <p className="text-xs text-muted-foreground mb-1">{t.cus_statAov}</p>
                 <p className="text-lg font-semibold">{formatPrice(aov)}</p>
               </div>
               <div className="rounded-lg border bg-muted/30 p-3 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Member since</p>
+                <p className="text-xs text-muted-foreground mb-1">{t.cus_statMemberSince}</p>
                 <p className="text-sm font-medium">2024</p>
               </div>
             </div>
 
             <Separator />
 
-            {/* Usual orders */}
             <div>
-              <h4 className="text-sm font-medium mb-3">Usual order</h4>
+              <h4 className="text-sm font-medium mb-3">{t.cus_usualOrder}</h4>
               <ul className="space-y-2">
                 {[
                   { name: "Classic Smash Burger", count: 18 },
@@ -480,12 +444,11 @@ function CustomerSheet({
               </ul>
             </div>
 
-            {/* Saved addresses */}
             {customer.saved_addresses.length > 0 && (
               <>
                 <Separator />
                 <div>
-                  <h4 className="text-sm font-medium mb-3">Saved addresses</h4>
+                  <h4 className="text-sm font-medium mb-3">{t.cus_savedAddresses}</h4>
                   <div className="flex flex-wrap gap-2">
                     {customer.saved_addresses.map((addr) => (
                       <div
@@ -516,7 +479,7 @@ function CustomerSheet({
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-sm">{order.number}</span>
-                  <OrderStatusBadge status={order.status} />
+                  <OrderStatusBadge status={order.status} t={t} />
                 </div>
                 <p className="text-sm text-muted-foreground">{order.summary}</p>
                 <div className="flex items-center justify-between">
@@ -532,11 +495,9 @@ function CustomerSheet({
                       variant="outline"
                       size="sm"
                       className="h-6 text-xs"
-                      onClick={() =>
-                        toast.info(`Reorder ${order.number} initiated`)
-                      }
+                      onClick={() => toast.info(`${t.reorder} ${order.number}`)}
                     >
-                      Reorder
+                      {t.reorder}
                     </Button>
                   </div>
                 </div>
@@ -547,23 +508,17 @@ function CustomerSheet({
           {/* ── Notes ── */}
           <TabsContent value="notes" className="p-6 space-y-4">
             <div className="space-y-1">
-              <h4 className="text-sm font-medium">Internal staff note</h4>
-              <p className="text-xs text-muted-foreground">
-                Never visible to the customer.
-              </p>
+              <h4 className="text-sm font-medium">{t.cus_internalNote}</h4>
+              <p className="text-xs text-muted-foreground">{t.cus_noteNotVisible}</p>
             </div>
             <Textarea
               defaultValue={currentNote}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Add an internal note about this customer…"
+              placeholder={t.cus_addNotePlaceholder}
               className="min-h-32"
             />
-            <Button
-              onClick={handleSaveNote}
-              disabled={saving}
-              className="w-full"
-            >
-              {saving ? "Saving…" : "Save note"}
+            <Button onClick={handleSaveNote} disabled={saving} className="w-full">
+              {saving ? t.stf_saving : t.cus_saveNote}
             </Button>
           </TabsContent>
         </Tabs>
@@ -577,6 +532,7 @@ function CustomerSheet({
    ───────────────────────────────────────────── */
 
 export default function CustomersPage() {
+  const t = useT();
   const [search, setSearch] = useState("");
   const [segmentFilter, setSegmentFilter] = useState<string>("all");
   const [sortKey, setSortKey] = useState<string>("total_spent_desc");
@@ -655,143 +611,73 @@ export default function CustomersPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      {/* ── Page header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Customers</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t.cus_pageTitle}</h1>
         <div className="flex flex-wrap items-center gap-2">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
             <Input
-              placeholder="Search name, phone, email…"
+              placeholder={t.cus_searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8 w-56"
             />
           </div>
 
-          {/* Segment filter */}
-          <Select
-            value={segmentFilter}
-            onValueChange={(v) => setSegmentFilter(v as string)}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Segment" />
-            </SelectTrigger>
+          <Select value={segmentFilter} onValueChange={(v) => setSegmentFilter(v as string)}>
+            <SelectTrigger className="w-32"><SelectValue placeholder={t.dashFilter} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="new">New</SelectItem>
-              <SelectItem value="regular">Regular</SelectItem>
+              <SelectItem value="all">{t.all}</SelectItem>
+              <SelectItem value="new">{t.new}</SelectItem>
+              <SelectItem value="regular">{t.cus_segmentRegular}</SelectItem>
               <SelectItem value="vip">VIP</SelectItem>
-              <SelectItem value="lapsed">Lapsed</SelectItem>
+              <SelectItem value="lapsed">{t.cus_segmentLapsed}</SelectItem>
             </SelectContent>
           </Select>
 
-          {/* Sort */}
-          <Select
-            value={sortKey}
-            onValueChange={(v) => setSortKey(v as string)}
-          >
-            <SelectTrigger className="w-44">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
+          <Select value={sortKey} onValueChange={(v) => setSortKey(v as string)}>
+            <SelectTrigger className="w-44"><SelectValue placeholder={t.dashFilter} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="total_spent_desc">Total spend ↓</SelectItem>
-              <SelectItem value="order_count_desc">Order count ↓</SelectItem>
-              <SelectItem value="last_order_desc">Last order ↓</SelectItem>
-              <SelectItem value="name_asc">Name A–Z</SelectItem>
+              <SelectItem value="total_spent_desc">{t.cus_sortTotalSpend}</SelectItem>
+              <SelectItem value="order_count_desc">{t.cus_sortOrderCount}</SelectItem>
+              <SelectItem value="last_order_desc">{t.cus_sortLastOrder}</SelectItem>
+              <SelectItem value="name_asc">{t.cus_sortNameAZ}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      {/* ── Stats row ── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card size="sm">
-          <CardHeader className="pb-1">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm text-muted-foreground font-normal">
-                Total customers
-              </CardTitle>
-              <Users className="size-4 text-muted-foreground" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{totalCustomers}</p>
-          </CardContent>
+          <CardHeader className="pb-1"><div className="flex items-center justify-between"><CardTitle className="text-sm text-muted-foreground font-normal">{t.cus_statTotalCustomers}</CardTitle><Users className="size-4 text-muted-foreground" /></div></CardHeader>
+          <CardContent><p className="text-2xl font-semibold">{totalCustomers}</p></CardContent>
         </Card>
-
         <Card size="sm">
-          <CardHeader className="pb-1">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm text-muted-foreground font-normal">
-                VIP customers
-              </CardTitle>
-              <Crown className="size-4 text-amber-500" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{vipCustomers}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">≥10 orders</p>
-          </CardContent>
+          <CardHeader className="pb-1"><div className="flex items-center justify-between"><CardTitle className="text-sm text-muted-foreground font-normal">{t.cus_statVipCustomers}</CardTitle><Crown className="size-4 text-amber-500" /></div></CardHeader>
+          <CardContent><p className="text-2xl font-semibold">{vipCustomers}</p><p className="text-xs text-muted-foreground mt-0.5">{t.cus_statMinOrders}</p></CardContent>
         </Card>
-
         <Card size="sm">
-          <CardHeader className="pb-1">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm text-muted-foreground font-normal">
-                WhatsApp opted in
-              </CardTitle>
-              <MessageCircle className="size-4 text-green-500" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{whatsappOptIn}</p>
-          </CardContent>
+          <CardHeader className="pb-1"><div className="flex items-center justify-between"><CardTitle className="text-sm text-muted-foreground font-normal">{t.cus_statWhatsappIn}</CardTitle><MessageCircle className="size-4 text-green-500" /></div></CardHeader>
+          <CardContent><p className="text-2xl font-semibold">{whatsappOptIn}</p></CardContent>
         </Card>
-
         <Card size="sm">
-          <CardHeader className="pb-1">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm text-muted-foreground font-normal">
-                Avg order value
-              </CardTitle>
-              <TrendingUp className="size-4 text-muted-foreground" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{formatPrice(avgOrderValue)}</p>
-          </CardContent>
+          <CardHeader className="pb-1"><div className="flex items-center justify-between"><CardTitle className="text-sm text-muted-foreground font-normal">{t.kpiAvgOrderValue}</CardTitle><TrendingUp className="size-4 text-muted-foreground" /></div></CardHeader>
+          <CardContent><p className="text-2xl font-semibold">{formatPrice(avgOrderValue)}</p></CardContent>
         </Card>
       </div>
 
-      {/* ── Table ── */}
       <div className="rounded-xl border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/40 border-b">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Customer
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Segment
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                  Orders
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                  Total spent
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground hidden md:table-cell">
-                  Last order
-                </th>
-                <th className="px-4 py-3 text-center font-medium text-muted-foreground">
-                  WhatsApp
-                </th>
-                <th className="px-4 py-3 text-center font-medium text-muted-foreground">
-                  Actions
-                </th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t.dashCustomer}</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t.ana_customerSegments}</th>
+                <th className="px-4 py-3 text-right font-medium text-muted-foreground">{t.navOrders}</th>
+                <th className="px-4 py-3 text-right font-medium text-muted-foreground">{t.cus_colTotalSpent}</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground hidden md:table-cell">{t.cus_colLastOrder}</th>
+                <th className="px-4 py-3 text-center font-medium text-muted-foreground">{t.cus_colWhatsapp}</th>
+                <th className="px-4 py-3 text-center font-medium text-muted-foreground">{t.dashActions}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -800,26 +686,14 @@ export default function CustomersPage() {
                   <td colSpan={7} className="px-4 py-16 text-center">
                     <div className="flex flex-col items-center gap-3 text-muted-foreground">
                       <Users className="size-10 opacity-30" />
-                      <p className="text-sm font-medium">
-                        No customers match your filters
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={clearFilters}
-                      >
-                        Clear filters
-                      </Button>
+                      <p className="text-sm font-medium">{t.cus_noMatch}</p>
+                      <Button variant="outline" size="sm" onClick={clearFilters}>{t.clearFilters}</Button>
                     </div>
                   </td>
                 </tr>
               ) : (
                 filtered.map((customer) => (
-                  <CustomerRow
-                    key={customer.id}
-                    customer={customer}
-                    onClick={() => openCustomer(customer)}
-                  />
+                  <CustomerRow key={customer.id} customer={customer} onClick={() => openCustomer(customer)} t={t} />
                 ))
               )}
             </tbody>
@@ -844,9 +718,11 @@ export default function CustomersPage() {
 function CustomerRow({
   customer,
   onClick,
+  t,
 }: {
   customer: Customer;
   onClick: () => void;
+  t: ReturnType<typeof useT>;
 }) {
   return (
     <tr
@@ -874,7 +750,7 @@ function CustomerRow({
           <div className="min-w-0">
             <p className="font-medium truncate">
               {customer.name ?? (
-                <span className="text-muted-foreground italic">No name</span>
+                <span className="text-muted-foreground italic">{t.cus_noName}</span>
               )}
             </p>
             <p className="text-xs text-muted-foreground">{customer.phone}</p>
@@ -882,9 +758,8 @@ function CustomerRow({
         </div>
       </td>
 
-      {/* Segment */}
       <td className="px-4 py-3">
-        <SegmentBadge segment={customer.segment} />
+        <SegmentBadge segment={customer.segment} t={t} />
       </td>
 
       {/* Orders */}
@@ -930,33 +805,17 @@ function CustomerRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={onClick}>
-                View profile
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onClick}>Add note</DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() =>
-                  toast.info(
-                    `WhatsApp message to ${customer.name ?? customer.phone}`
-                  )
-                }
-              >
-                <MessageCircle className="size-4" />
-                Send WhatsApp
+              <DropdownMenuLabel>{t.dashActions}</DropdownMenuLabel>
+              <DropdownMenuItem onClick={onClick}>{t.cus_viewProfile}</DropdownMenuItem>
+              <DropdownMenuItem onClick={onClick}>{t.cus_addNote}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast.info(`${t.cus_sendWhatsapp}: ${customer.name ?? customer.phone}`)}>
+                <MessageCircle className="size-4" />{t.cus_sendWhatsapp}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() =>
-                  toast.info(
-                    `${customer.name ?? customer.phone} has been blocked`
-                  )
-                }
-              >
-                Block customer
+              <DropdownMenuItem variant="destructive" onClick={() => toast.info(`${t.cus_blockCustomer}: ${customer.name ?? customer.phone}`)}>
+                {t.cus_blockCustomer}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

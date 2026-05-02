@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 import {
   Plus,
@@ -317,36 +318,21 @@ function fullName(r: Reservation) {
   return `${r.firstName} ${r.lastName}`;
 }
 
-function statusConfig(status: ReservationStatus): {
+function getStatusConfig(status: ReservationStatus, t: ReturnType<typeof useT>): {
   label: string;
   className: string;
 } {
   switch (status) {
     case "upcoming":
-      return {
-        label: "Upcoming",
-        className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-      };
+      return { label: t.rsv_statusUpcoming, className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" };
     case "seated":
-      return {
-        label: "Seated",
-        className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-      };
+      return { label: t.rsv_statusSeated, className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" };
     case "completed":
-      return {
-        label: "Completed",
-        className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
-      };
+      return { label: t.completed, className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" };
     case "no_show":
-      return {
-        label: "No-show",
-        className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-      };
+      return { label: t.rsv_statusNoShow, className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" };
     case "cancelled":
-      return {
-        label: "Cancelled",
-        className: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500 line-through",
-      };
+      return { label: t.cancelled, className: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500 line-through" };
   }
 }
 
@@ -373,14 +359,10 @@ type ReservationFormValues = z.infer<typeof reservationSchema>;
 // ─── StatusBadge ───────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: ReservationStatus }) {
-  const cfg = statusConfig(status);
+  const t = useT();
+  const cfg = getStatusConfig(status, t);
   return (
-    <span
-      className={cn(
-        "inline-flex h-5 items-center rounded-full px-2 py-0.5 text-xs font-medium",
-        cfg.className
-      )}
-    >
+    <span className={cn("inline-flex h-5 items-center rounded-full px-2 py-0.5 text-xs font-medium", cfg.className)}>
       {cfg.label}
     </span>
   );
@@ -397,39 +379,24 @@ function CancelDialog({
   onOpenChange: (v: boolean) => void;
   onConfirm: (reason: string) => void;
 }) {
+  const t = useT();
   const [reason, setReason] = useState("");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Cancel Reservation</DialogTitle>
-          <DialogDescription>
-            Please provide a reason for cancellation (optional).
-          </DialogDescription>
+          <DialogTitle>{t.rsv_cancelDialogTitle}</DialogTitle>
+          <DialogDescription>{t.rsv_cancelDialogDesc}</DialogDescription>
         </DialogHeader>
         <div className="space-y-1.5 py-2">
-          <Label htmlFor="cancel-reason">Reason</Label>
-          <Textarea
-            id="cancel-reason"
-            placeholder="e.g. Guest called to cancel…"
-            rows={3}
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
+          <Label htmlFor="cancel-reason">{t.rsv_cancelReasonLabel}</Label>
+          <Textarea id="cancel-reason" placeholder={t.rsv_cancelReasonPlaceholder} rows={3}
+            value={reason} onChange={(e) => setReason(e.target.value)} />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Back
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => {
-              onConfirm(reason);
-              setReason("");
-              onOpenChange(false);
-            }}
-          >
-            Cancel reservation
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.back}</Button>
+          <Button variant="destructive" onClick={() => { onConfirm(reason); setReason(""); onOpenChange(false); }}>
+            {t.rsv_cancelBtn}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -448,11 +415,12 @@ function WalkInDialog({
   onOpenChange: (v: boolean) => void;
   onSeat: (name: string, party: number) => void;
 }) {
+  const t = useT();
   const [name, setName] = useState("");
   const [party, setParty] = useState(2);
 
   const handleSeat = () => {
-    onSeat(name.trim() || "Walk-in Guest", party);
+    onSeat(name.trim() || t.rsv_walkInDefault, party);
     setName("");
     setParty(2);
     onOpenChange(false);
@@ -462,23 +430,17 @@ function WalkInDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Quick Walk-in</DialogTitle>
-          <DialogDescription>
-            Seat a walk-in guest immediately at T1.
-          </DialogDescription>
+          <DialogTitle>{t.rsv_walkInTitle}</DialogTitle>
+          <DialogDescription>{t.rsv_walkInDesc}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label htmlFor="walkin-name">Guest name (optional)</Label>
-            <Input
-              id="walkin-name"
-              placeholder="Walk-in Guest"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <Label htmlFor="walkin-name">{t.rsv_guestNameLabel}</Label>
+            <Input id="walkin-name" placeholder={t.rsv_walkInDefault}
+              value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Party size</Label>
+            <Label>{t.partySize}</Label>
             <div className="flex flex-wrap gap-2">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                 <button
@@ -499,12 +461,10 @@ function WalkInDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.dashCancel}</Button>
           <Button onClick={handleSeat}>
             <UserPlus className="size-4" />
-            Seat Now
+            {t.rsv_seatNow}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -525,6 +485,7 @@ function ReservationSheet({
   editTarget: Reservation | null;
   onSave: (values: ReservationFormValues, id?: string) => void;
 }) {
+  const t = useT();
   const [saving, setSaving] = useState(false);
 
   const {
@@ -610,11 +571,9 @@ function ReservationSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{editTarget ? "Edit Reservation" : "New Reservation"}</SheetTitle>
+          <SheetTitle>{editTarget ? t.rsv_editTitle : t.rsv_newTitle}</SheetTitle>
           <SheetDescription>
-            {editTarget
-              ? "Update the reservation details below."
-              : "Fill in the details to create a new reservation."}
+            {editTarget ? t.rsv_editDesc : t.rsv_newDesc}
           </SheetDescription>
         </SheetHeader>
 
@@ -623,11 +582,11 @@ function ReservationSheet({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="r-fname">
-                First name <span className="text-destructive">*</span>
+                {t.firstName} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="r-fname"
-                placeholder="First"
+                placeholder={t.rsv_firstPlaceholder}
                 {...register("firstName")}
                 aria-invalid={!!errors.firstName}
               />
@@ -637,11 +596,11 @@ function ReservationSheet({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="r-lname">
-                Last name <span className="text-destructive">*</span>
+                {t.lastName} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="r-lname"
-                placeholder="Last"
+                placeholder={t.rsv_lastPlaceholder}
                 {...register("lastName")}
                 aria-invalid={!!errors.lastName}
               />
@@ -655,7 +614,7 @@ function ReservationSheet({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="r-phone">
-                Phone <span className="text-destructive">*</span>
+                {t.phoneNumber} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="r-phone"
@@ -668,7 +627,7 @@ function ReservationSheet({
               )}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="r-email">Email</Label>
+              <Label htmlFor="r-email">{t.email}</Label>
               <Input
                 id="r-email"
                 type="email"
@@ -682,7 +641,7 @@ function ReservationSheet({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="r-date">
-                Date <span className="text-destructive">*</span>
+                {t.rsv_dateLabel} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="r-date"
@@ -696,14 +655,14 @@ function ReservationSheet({
             </div>
             <div className="space-y-1.5">
               <Label>
-                Time <span className="text-destructive">*</span>
+                {t.rsv_timeLabel} <span className="text-destructive">*</span>
               </Label>
               <Select
                 value={timeVal}
                 onValueChange={(v) => setValue("time", v as string)}
               >
                 <SelectTrigger className="w-full" aria-invalid={!!errors.time}>
-                  <SelectValue placeholder="Select time" />
+                  <SelectValue placeholder={t.rsv_selectTime} />
                 </SelectTrigger>
                 <SelectContent>
                   {TIME_SLOTS.map((t) => (
@@ -722,7 +681,7 @@ function ReservationSheet({
           {/* Party size */}
           <div className="space-y-1.5">
             <Label>
-              Party size <span className="text-destructive">*</span>
+              {t.partySize} <span className="text-destructive">*</span>
             </Label>
             <div className="flex items-center gap-2">
               <Button
@@ -751,20 +710,20 @@ function ReservationSheet({
                 +
               </Button>
               <span className="text-xs text-muted-foreground">
-                {parseInt(partyVal || "2", 10) === 1 ? "person" : "people"}
+                {parseInt(partyVal || "2", 10) === 1 ? t.rsv_person : t.rsv_people}
               </span>
             </div>
           </div>
 
           {/* Table */}
           <div className="space-y-1.5">
-            <Label>Table</Label>
+            <Label>{t.rsv_tableLabel}</Label>
             <Select
               value={tableVal ?? "No preference"}
               onValueChange={(v) => setValue("table", v as string)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select table" />
+                <SelectValue placeholder={t.rsv_selectTable} />
               </SelectTrigger>
               <SelectContent>
                 {TABLES.map((t) => (
@@ -778,10 +737,10 @@ function ReservationSheet({
 
           {/* Special requests */}
           <div className="space-y-1.5">
-            <Label htmlFor="r-requests">Special requests</Label>
+            <Label htmlFor="r-requests">{t.specialRequests}</Label>
             <Textarea
               id="r-requests"
-              placeholder="Allergies, occasion, accessibility needs…"
+              placeholder={t.rsv_requestsPlaceholder}
               rows={2}
               {...register("specialRequests")}
             />
@@ -791,7 +750,7 @@ function ReservationSheet({
           <div className="space-y-2 rounded-lg border border-border p-3">
             <div className="flex items-center justify-between">
               <Label htmlFor="r-deposit" className="cursor-pointer">
-                Deposit required
+                {t.rsv_depositRequired}
               </Label>
               <Switch
                 id="r-deposit"
@@ -801,7 +760,7 @@ function ReservationSheet({
             </div>
             {depositVal && (
               <div className="space-y-1.5 pt-1">
-                <Label htmlFor="r-deposit-amt">Deposit amount ($)</Label>
+                <Label htmlFor="r-deposit-amt">{t.rsv_depositAmount}</Label>
                 <Input
                   id="r-deposit-amt"
                   type="number"
@@ -816,10 +775,10 @@ function ReservationSheet({
 
           {/* Internal notes */}
           <div className="space-y-1.5">
-            <Label htmlFor="r-notes">Internal notes</Label>
+            <Label htmlFor="r-notes">{t.rsv_internalNotes}</Label>
             <Textarea
               id="r-notes"
-              placeholder="Staff-only notes…"
+              placeholder={t.rsv_staffNotes}
               rows={2}
               {...register("internalNotes")}
             />
@@ -827,20 +786,20 @@ function ReservationSheet({
 
           {/* Status */}
           <div className="space-y-1.5">
-            <Label>Status</Label>
+            <Label>{t.dashStatus}</Label>
             <Select
               value={statusVal}
               onValueChange={(v) => setValue("status", v as ReservationStatus)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select status" />
+                <SelectValue placeholder={t.rsv_selectStatus} />
               </SelectTrigger>
               <SelectContent>
                 {(
                   ["upcoming", "seated", "completed", "no_show", "cancelled"] as ReservationStatus[]
                 ).map((s) => (
                   <SelectItem key={s} value={s}>
-                    {statusConfig(s).label}
+                    {getStatusConfig(s, t).label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -850,15 +809,8 @@ function ReservationSheet({
           <SheetFooter className="px-0 pt-2">
             <Button type="submit" disabled={saving} className="w-full">
               {saving ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Saving…
-                </>
-              ) : editTarget ? (
-                "Update reservation"
-              ) : (
-                "Create reservation"
-              )}
+                <><Loader2 className="size-4 animate-spin" />{t.rsv_saving}</>
+              ) : editTarget ? t.rsv_updateBtn : t.rsv_createBtn}
             </Button>
           </SheetFooter>
         </form>
@@ -880,27 +832,22 @@ function RowActions({
   onEdit: (r: Reservation) => void;
   onCancelRequest: (id: string) => void;
 }) {
+  const t = useT();
   const { status } = reservation;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Actions" />
-        }
+        render={<Button variant="ghost" size="icon" className="h-7 w-7" aria-label={t.dashActions} />}
       >
         <MoreHorizontal className="size-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => onEdit(reservation)}>
-            Edit
-          </DropdownMenuItem>
+          <DropdownMenuLabel>{t.dashActions}</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => onEdit(reservation)}>{t.dashEdit}</DropdownMenuItem>
           {status === "upcoming" && (
-            <DropdownMenuItem
-              onClick={() => onStatusChange(reservation.id, "no_show")}
-            >
-              Mark no-show
+            <DropdownMenuItem onClick={() => onStatusChange(reservation.id, "no_show")}>
+              {t.rsv_markNoShow}
             </DropdownMenuItem>
           )}
         </DropdownMenuGroup>
@@ -908,12 +855,9 @@ function RowActions({
           <>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuLabel>Danger</DropdownMenuLabel>
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => onCancelRequest(reservation.id)}
-              >
-                Cancel with reason
+              <DropdownMenuLabel>{t.rsv_danger}</DropdownMenuLabel>
+              <DropdownMenuItem variant="destructive" onClick={() => onCancelRequest(reservation.id)}>
+                {t.rsv_cancelWithReason}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </>
@@ -936,6 +880,7 @@ function ReservationCard({
   onEdit: (r: Reservation) => void;
   onCancelRequest: (id: string) => void;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-col sm:flex-row sm:items-start gap-3 rounded-xl border border-border bg-card p-4 hover:bg-muted/20 transition-colors">
       {/* Time + date */}
@@ -953,7 +898,7 @@ function ReservationCard({
           <StatusBadge status={r.status} />
           {r.deposit && (
             <span className="inline-flex h-5 items-center rounded-full bg-amber-100 px-2 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-              Deposit
+              {t.rsv_depositBadge}
             </span>
           )}
         </div>
@@ -967,10 +912,10 @@ function ReservationCard({
         <div className="flex flex-wrap items-center gap-3 pt-0.5">
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Users className="size-3" />
-            {r.party} {r.party === 1 ? "person" : "people"}
+            {r.party} {r.party === 1 ? t.rsv_person : t.rsv_people}
           </span>
           <span className="text-xs text-muted-foreground">
-            Table: {r.table || "Unassigned"}
+            {t.rsv_tablePrefix} {r.table || t.rsv_unassigned}
           </span>
         </div>
         {r.specialRequests && (
@@ -983,21 +928,13 @@ function ReservationCard({
       {/* Actions */}
       <div className="flex items-center gap-1.5 shrink-0">
         {r.status === "upcoming" && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onStatusChange(r.id, "seated")}
-          >
-            Seat
+          <Button size="sm" variant="outline" onClick={() => onStatusChange(r.id, "seated")}>
+            {t.rsv_seatBtn}
           </Button>
         )}
         {r.status === "seated" && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onStatusChange(r.id, "completed")}
-          >
-            Complete
+          <Button size="sm" variant="outline" onClick={() => onStatusChange(r.id, "completed")}>
+            {t.rsv_completeBtn}
           </Button>
         )}
         <RowActions
@@ -1026,6 +963,7 @@ function ListView({
   onEdit: (r: Reservation) => void;
   onCancelRequest: (id: string) => void;
 }) {
+  const t = useT();
   const [filter, setFilter] = useState<FilterTab>("today");
   const [search, setSearch] = useState("");
 
@@ -1056,10 +994,10 @@ function ListView({
   }, [reservations, filter, search, weekDates]);
 
   const filterTabs: { value: FilterTab; label: string }[] = [
-    { value: "today", label: "Today" },
-    { value: "tomorrow", label: "Tomorrow" },
-    { value: "week", label: "This Week" },
-    { value: "all", label: "All Upcoming" },
+    { value: "today",    label: t.rsv_filterToday },
+    { value: "tomorrow", label: t.rsv_filterTomorrow },
+    { value: "week",     label: t.rsv_filterThisWeek },
+    { value: "all",      label: t.rsv_filterAllUpcoming },
   ];
 
   return (
@@ -1086,7 +1024,7 @@ function ListView({
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search guest, phone…"
+            placeholder={t.rsv_searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-7 pl-8 w-52 text-xs"
@@ -1098,7 +1036,7 @@ function ListView({
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 gap-2 text-muted-foreground">
           <CalendarDays className="size-8 opacity-40" />
-          <span className="text-sm">No reservations found</span>
+          <span className="text-sm">{t.rsv_noFound}</span>
         </div>
       ) : (
         <div className="space-y-2">
@@ -1240,12 +1178,13 @@ function WaitlistSection({
   onNotify: (id: string, name: string) => void;
   onRemove: (id: string) => void;
 }) {
+  const t = useT();
   if (entries.length === 0) return null;
   return (
     <div className="rounded-xl border border-border bg-card">
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <Clock className="size-4 text-muted-foreground" />
-        <h3 className="text-sm font-semibold">Waitlist</h3>
+        <h3 className="text-sm font-semibold">{t.rsv_waitlist}</h3>
         <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/10 px-1.5 text-xs font-medium text-primary">
           {entries.length}
         </span>
@@ -1270,18 +1209,14 @@ function WaitlistSection({
                   {e.phone}
                 </a>
                 <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                  ~{e.waitMinutes} min wait
+                  ~{e.waitMinutes} {t.rsv_minWait}
                 </span>
               </div>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onNotify(e.id, e.name)}
-              >
+              <Button size="sm" variant="outline" onClick={() => onNotify(e.id, e.name)}>
                 <Bell className="size-3" />
-                Notify
+                {t.rsv_notify}
               </Button>
               <Button
                 size="icon"
@@ -1303,6 +1238,7 @@ function WaitlistSection({
 // ─── Reservation Rules ──────────────────────────────────────────────────────────
 
 function ReservationRules() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [maxParty, setMaxParty] = useState("10");
   const [buffer, setBuffer] = useState("15");
@@ -1310,7 +1246,7 @@ function ReservationRules() {
   const [maxPerSlot, setMaxPerSlot] = useState("4");
 
   const handleSave = () => {
-    toast.success("Reservation rules saved");
+    toast.success(t.rsv_toastRulesSaved);
   };
 
   return (
@@ -1321,7 +1257,7 @@ function ReservationRules() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
-        <span className="text-sm font-semibold">Reservation Rules</span>
+        <span className="text-sm font-semibold">{t.rsv_rules}</span>
         <span className="text-muted-foreground transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined }}>
           <ChevronDown className="size-4" />
         </span>
@@ -1331,7 +1267,7 @@ function ReservationRules() {
         <div className="border-t border-border px-4 pb-4 pt-4 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="rr-max-party">Max party size per slot</Label>
+              <Label htmlFor="rr-max-party">{t.rsv_maxPartySlot}</Label>
               <Input
                 id="rr-max-party"
                 type="number"
@@ -1342,7 +1278,7 @@ function ReservationRules() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="rr-max-slot">Max reservations per slot</Label>
+              <Label htmlFor="rr-max-slot">{t.rsv_maxPerSlot}</Label>
               <Input
                 id="rr-max-slot"
                 type="number"
@@ -1353,37 +1289,31 @@ function ReservationRules() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Buffer between bookings</Label>
+              <Label>{t.rsv_buffer}</Label>
               <Select value={buffer} onValueChange={(v) => setBuffer(v as string)}>
-                <SelectTrigger className="w-full max-w-xs">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">None</SelectItem>
-                  <SelectItem value="15">15 minutes</SelectItem>
-                  <SelectItem value="30">30 minutes</SelectItem>
-                  <SelectItem value="60">60 minutes</SelectItem>
+                  <SelectItem value="0">{t.rsv_bufferNone}</SelectItem>
+                  <SelectItem value="15">{t.rsv_buffer15}</SelectItem>
+                  <SelectItem value="30">{t.rsv_buffer30}</SelectItem>
+                  <SelectItem value="60">{t.rsv_buffer60}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Booking window</Label>
+              <Label>{t.rsv_bookingWindow}</Label>
               <Select value={window_} onValueChange={(v) => setWindow(v as string)}>
-                <SelectTrigger className="w-full max-w-xs">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="same">Same day only</SelectItem>
-                  <SelectItem value="7d">7 days ahead</SelectItem>
-                  <SelectItem value="30d">30 days ahead</SelectItem>
-                  <SelectItem value="90d">90 days ahead</SelectItem>
+                  <SelectItem value="same">{t.rsv_windowSameDay}</SelectItem>
+                  <SelectItem value="7d">{t.rsv_window7d}</SelectItem>
+                  <SelectItem value="30d">{t.rsv_window30d}</SelectItem>
+                  <SelectItem value="90d">{t.rsv_window90d}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
-          <Button onClick={handleSave} size="sm">
-            Save rules
-          </Button>
+          <Button onClick={handleSave} size="sm">{t.rsv_saveRules}</Button>
         </div>
       )}
     </div>
@@ -1393,6 +1323,7 @@ function ReservationRules() {
 // ─── Stats Row ──────────────────────────────────────────────────────────────────
 
 function StatsRow({ reservations }: { reservations: Reservation[] }) {
+  const t = useT();
   const todayCount = reservations.filter((r) => r.date === TODAY).length;
 
   const sevenDaysDates: string[] = [];
@@ -1412,10 +1343,10 @@ function StatsRow({ reservations }: { reservations: Reservation[] }) {
       : "0";
 
   const stats = [
-    { label: "Today", value: todayCount },
-    { label: "Upcoming 7d", value: upcomingCount },
-    { label: "No-show rate", value: `${noShowRate}%` },
-    { label: "Avg party size", value: avgParty },
+    { label: t.rsv_statToday,      value: todayCount },
+    { label: t.rsv_statUpcoming7d, value: upcomingCount },
+    { label: t.rsv_statNoShowRate, value: `${noShowRate}%` },
+    { label: t.rsv_statAvgParty,   value: avgParty },
   ];
 
   return (
@@ -1436,6 +1367,7 @@ function StatsRow({ reservations }: { reservations: Reservation[] }) {
 // ─── Page ───────────────────────────────────────────────────────────────────────
 
 export default function ReservationsPage() {
+  const t = useT();
   const [reservations, setReservations] = useState<Reservation[]>(INITIAL_RESERVATIONS);
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>(INITIAL_WAITLIST);
   const [view, setView] = useState<"list" | "calendar">("list");
@@ -1453,7 +1385,7 @@ export default function ReservationsPage() {
 
   const handleStatusChange = (id: string, status: ReservationStatus) => {
     setReservations((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
-    toast.success(`Marked as ${statusConfig(status).label}`);
+    toast.success(`${getStatusConfig(status, t).label}`);
   };
 
   const handleEdit = (r: Reservation) => {
@@ -1476,7 +1408,7 @@ export default function ReservationsPage() {
     setReservations((prev) =>
       prev.map((r) => (r.id === cancelTargetId ? { ...r, status: "cancelled" } : r))
     );
-    toast.success(reason ? `Cancelled: ${reason}` : "Reservation cancelled");
+    toast.success(reason ? `${t.rsv_toastCancelled}: ${reason}` : t.rsv_toastCancelled);
     setCancelTargetId(null);
   };
 
@@ -1504,7 +1436,7 @@ export default function ReservationsPage() {
             : r
         )
       );
-      toast.success("Reservation updated");
+      toast.success(t.rsv_toastUpdated);
     } else {
       const newRes: Reservation = {
         id: `r${Date.now()}`,
@@ -1523,7 +1455,7 @@ export default function ReservationsPage() {
         status: values.status,
       };
       setReservations((prev) => [...prev, newRes]);
-      toast.success("Reservation created");
+      toast.success(t.rsv_toastCreated);
     }
   };
 
@@ -1552,7 +1484,7 @@ export default function ReservationsPage() {
 
   const handleRemoveWaitlist = (id: string) => {
     setWaitlist((prev) => prev.filter((e) => e.id !== id));
-    toast.success("Removed from waitlist");
+    toast.success(t.rsv_toastRemovedWaitlist);
   };
 
   return (
@@ -1560,19 +1492,15 @@ export default function ReservationsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">Reservations</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Manage table reservations, walk-ins, and waitlists.
-          </p>
+          <h1 className="text-xl font-bold tracking-tight">{t.rsv_pageTitle}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t.rsv_pageSubtitle}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" onClick={() => setWalkInOpen(true)}>
-            <UserPlus className="size-4" />
-            Walk-in
+            <UserPlus className="size-4" />{t.rsv_walkIn}
           </Button>
           <Button onClick={handleNew}>
-            <Plus className="size-4" />
-            New Reservation
+            <Plus className="size-4" />{t.rsv_newReservation}
           </Button>
           {/* View toggle */}
           <div className="flex items-center rounded-lg border border-border overflow-hidden">
@@ -1621,10 +1549,8 @@ export default function ReservationsPage() {
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="border-b border-border px-4 py-3 flex items-center gap-2">
             <Calendar className="size-4 text-muted-foreground" />
-            <span className="text-sm font-semibold">Week View</span>
-            <span className="text-xs text-muted-foreground ml-1">
-              Click a card to edit
-            </span>
+            <span className="text-sm font-semibold">{t.rsv_weekView}</span>
+            <span className="text-xs text-muted-foreground ms-1">{t.rsv_clickToEdit}</span>
           </div>
           <CalendarView reservations={reservations} onEdit={handleEdit} />
         </div>

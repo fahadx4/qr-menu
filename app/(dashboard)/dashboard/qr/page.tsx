@@ -51,6 +51,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn, formatPrice } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import { mockTenant } from "@/mock/tenant";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -125,6 +126,7 @@ const INITIAL_CAMPAIGNS: Campaign[] = [
 // ─── MasterQR Tab ─────────────────────────────────────────────────────────────
 
 function MasterQRTab() {
+  const t = useT();
   const [fgColor, setFgColor] = useState("#000000");
   const [bgColor, setBgColor] = useState("#ffffff");
   const [qrSize, setQrSize] = useState(220);
@@ -147,15 +149,15 @@ function MasterQRTab() {
   }, []);
 
   const handleDownloadPdf = () => {
-    toast.info("PDF export coming soon");
+    toast.info(t.qrc_pdfSoon);
   };
 
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(BASE_URL);
-      toast.success("Link copied");
+      toast.success(t.qrc_linkCopied);
     } catch {
-      toast.error("Failed to copy link");
+      toast.error(t.qrc_copyFailed);
     }
   };
 
@@ -205,15 +207,15 @@ function MasterQRTab() {
         <div className="flex gap-2 flex-wrap justify-center w-full">
           <Button onClick={handleDownloadPng} className="flex-1 min-w-[130px]">
             <Download className="size-4" />
-            Download PNG
+            {t.qrc_downloadPng}
           </Button>
           <Button variant="outline" onClick={handleCopyLink} className="flex-1 min-w-[100px]">
             <Copy className="size-4" />
-            Copy link
+            {t.qrc_copyLink}
           </Button>
           <Button variant="outline" onClick={handleDownloadPdf} className="w-full">
             <FileText className="size-4" />
-            Download PDF
+            {t.qrc_downloadPdf}
           </Button>
         </div>
       </div>
@@ -222,15 +224,15 @@ function MasterQRTab() {
       <div className="flex-1 min-w-0">
         <div className="rounded-2xl border border-border bg-card p-6 space-y-6">
           <div>
-            <h2 className="text-base font-semibold">Customise</h2>
+            <h2 className="text-base font-semibold">{t.qrc_customise}</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Personalise your QR code appearance
+              {t.qrc_customiseSubtitle}
             </p>
           </div>
 
           {/* Foreground colour */}
           <div className="space-y-2">
-            <Label>Foreground colour</Label>
+            <Label>{t.qrc_fgColour}</Label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
@@ -253,7 +255,7 @@ function MasterQRTab() {
 
           {/* Background colour */}
           <div className="space-y-2">
-            <Label>Background colour</Label>
+            <Label>{t.qrc_bgColour}</Label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
@@ -276,7 +278,7 @@ function MasterQRTab() {
 
           {/* Size selector */}
           <div className="space-y-2">
-            <Label>Size</Label>
+            <Label>{t.qrc_size}</Label>
             <div className="flex gap-2">
               {([150, 220, 300] as const).map((s) => (
                 <button
@@ -290,7 +292,7 @@ function MasterQRTab() {
                       : "border-border bg-background text-muted-foreground hover:bg-muted"
                   )}
                 >
-                  {s === 150 ? "Small" : s === 220 ? "Medium" : "Large"}
+                  {s === 150 ? t.qrc_small : s === 220 ? t.qrc_medium : t.qrc_large}
                   <span className="ml-1 text-xs opacity-60">({s}px)</span>
                 </button>
               ))}
@@ -299,7 +301,7 @@ function MasterQRTab() {
 
           {/* Error correction */}
           <div className="space-y-2">
-            <Label>Error correction level</Label>
+            <Label>{t.qrc_errorCorrection}</Label>
             <Select
               value={ecLevel}
               onValueChange={(v) => setEcLevel(v as EcLevel)}
@@ -319,9 +321,9 @@ function MasterQRTab() {
           {/* Logo in centre */}
           <div className="flex items-center justify-between gap-4 py-2 border-t border-border">
             <div>
-              <p className="text-sm font-medium">Logo in centre</p>
+              <p className="text-sm font-medium">{t.qrc_logoCentre}</p>
               <p className="text-xs text-muted-foreground">
-                Embed the restaurant logo into the QR code
+                {t.qrc_logoDesc}
               </p>
             </div>
             <Switch
@@ -345,6 +347,7 @@ interface TableQRCardProps {
 }
 
 function TableQRCard({ table, onEdit, onDelete }: TableQRCardProps) {
+  const t = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const tableUrl = `${BASE_URL}?table=${encodeURIComponent(table.number)}`;
 
@@ -366,7 +369,7 @@ function TableQRCard({ table, onEdit, onDelete }: TableQRCardProps) {
     <Card className="flex flex-col gap-0">
       <CardContent className="pt-4 flex flex-col items-center gap-3">
         <p className="text-2xl font-bold tracking-tight">{table.number}</p>
-        <p className="text-xs text-muted-foreground">{table.capacity} seats</p>
+        <p className="text-xs text-muted-foreground">{table.capacity} {table.capacity === 1 ? t.qrc_seat : t.qrc_seats}</p>
 
         {/* Visible small QR */}
         <QRCodeSVG value={tableUrl} size={80} level="M" />
@@ -379,7 +382,7 @@ function TableQRCard({ table, onEdit, onDelete }: TableQRCardProps) {
         <div className="flex gap-2 w-full">
           <Button size="sm" variant="outline" className="flex-1" onClick={handleDownload}>
             <Download className="size-3.5" />
-            Download
+            {t.qrc_downloadPng}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -390,10 +393,10 @@ function TableQRCard({ table, onEdit, onDelete }: TableQRCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
-                <DropdownMenuLabel>Table actions</DropdownMenuLabel>
+                <DropdownMenuLabel>{t.qrc_tableActions}</DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => onEdit(table)}>
                   <Pencil className="size-4" />
-                  Edit name
+                  {t.qrc_editName}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -401,7 +404,7 @@ function TableQRCard({ table, onEdit, onDelete }: TableQRCardProps) {
                   onClick={() => onDelete(table.id)}
                 >
                   <Trash2 className="size-4" />
-                  Delete
+                  {t.qrc_deleteTable}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -421,6 +424,7 @@ interface AddTableDialogProps {
 }
 
 function AddTableDialog({ open, onOpenChange, onAdd }: AddTableDialogProps) {
+  const t = useT();
   const [tableNumber, setTableNumber] = useState("");
   const [capacity, setCapacity] = useState("4");
 
@@ -440,14 +444,14 @@ function AddTableDialog({ open, onOpenChange, onAdd }: AddTableDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add table</DialogTitle>
+          <DialogTitle>{t.qrc_addTable}</DialogTitle>
           <DialogDescription>
-            Create a new table QR code for your restaurant.
+            {t.qrc_addTableDesc}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="add-table-number">Table number</Label>
+            <Label htmlFor="add-table-number">{t.qrc_tableNumber}</Label>
             <Input
               id="add-table-number"
               value={tableNumber}
@@ -457,7 +461,7 @@ function AddTableDialog({ open, onOpenChange, onAdd }: AddTableDialogProps) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="add-table-capacity">Capacity (seats)</Label>
+            <Label htmlFor="add-table-capacity">{t.qrc_capacitySeats}</Label>
             <Input
               id="add-table-capacity"
               type="number"
@@ -472,9 +476,9 @@ function AddTableDialog({ open, onOpenChange, onAdd }: AddTableDialogProps) {
             <DialogClose
               render={<Button variant="outline" type="button" />}
             >
-              Cancel
+              {t.dashCancel}
             </DialogClose>
-            <Button type="submit">Add table</Button>
+            <Button type="submit">{t.qrc_addTable}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -491,6 +495,7 @@ interface EditTableDialogProps {
 }
 
 function EditTableDialog({ table, onClose, onSave }: EditTableDialogProps) {
+  const t = useT();
   const [tableNumber, setTableNumber] = useState(table?.number ?? "");
   const [capacity, setCapacity] = useState(String(table?.capacity ?? 4));
 
@@ -516,14 +521,14 @@ function EditTableDialog({ table, onClose, onSave }: EditTableDialogProps) {
     <Dialog open={!!table} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit table</DialogTitle>
+          <DialogTitle>{t.qrc_editTable}</DialogTitle>
           <DialogDescription>
-            Update the table number and seating capacity.
+            {t.tbl_editTableDesc}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="edit-table-number">Table number</Label>
+            <Label htmlFor="edit-table-number">{t.qrc_tableNumber}</Label>
             <Input
               id="edit-table-number"
               value={tableNumber}
@@ -532,7 +537,7 @@ function EditTableDialog({ table, onClose, onSave }: EditTableDialogProps) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="edit-table-capacity">Capacity (seats)</Label>
+            <Label htmlFor="edit-table-capacity">{t.qrc_capacitySeats}</Label>
             <Input
               id="edit-table-capacity"
               type="number"
@@ -547,9 +552,9 @@ function EditTableDialog({ table, onClose, onSave }: EditTableDialogProps) {
             <DialogClose
               render={<Button variant="outline" type="button" />}
             >
-              Cancel
+              {t.dashCancel}
             </DialogClose>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit">{t.tbl_saveChanges}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -567,18 +572,19 @@ interface DeleteTableDialogProps {
 }
 
 function DeleteTableDialog({ tableId, tableName, onClose, onConfirm }: DeleteTableDialogProps) {
+  const t = useT();
   return (
     <Dialog open={!!tableId} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Table {tableName}?</DialogTitle>
+          <DialogTitle>{t.tbl_deleteTable} {tableName}?</DialogTitle>
           <DialogDescription>
-            This will permanently delete the table QR code. This action cannot be undone.
+            {t.tbl_deleteConfirmDesc}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>
-            Cancel
+            {t.dashCancel}
           </DialogClose>
           <Button
             variant="destructive"
@@ -589,7 +595,7 @@ function DeleteTableDialog({ tableId, tableName, onClose, onConfirm }: DeleteTab
               }
             }}
           >
-            Delete
+            {t.dashDelete}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -600,6 +606,7 @@ function DeleteTableDialog({ tableId, tableName, onClose, onConfirm }: DeleteTab
 // ─── TableQRsTab ──────────────────────────────────────────────────────────────
 
 function TableQRsTab() {
+  const t = useT();
   const [tables, setTables] = useState<TableEntry[]>(INITIAL_TABLES);
   const [addOpen, setAddOpen] = useState(false);
   const [editTable, setEditTable] = useState<TableEntry | null>(null);
@@ -632,17 +639,17 @@ function TableQRsTab() {
       <div className="flex items-center gap-2 flex-wrap">
         <Button onClick={() => setAddOpen(true)}>
           <Plus className="size-4" />
-          Add table
+          {t.qrc_addTable}
         </Button>
         <Button
           variant="outline"
-          onClick={() => toast.info("Bulk PDF download coming soon")}
+          onClick={() => toast.info(t.qrc_bulkPdfSoon)}
         >
           <FileText className="size-4" />
-          Download all (PDF)
+          {t.qrc_downloadAll}
         </Button>
         <div className="ml-auto text-sm text-muted-foreground">
-          {tables.length} table{tables.length !== 1 ? "s" : ""}
+          {tables.length} {t.qrc_seats}
         </div>
       </div>
 
@@ -650,10 +657,10 @@ function TableQRsTab() {
       {tables.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border py-16 text-center">
           <QrCode className="size-10 text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">No tables yet</p>
+          <p className="text-sm text-muted-foreground">{t.qrc_noTablesYet}</p>
           <Button size="sm" onClick={() => setAddOpen(true)}>
             <Plus className="size-4" />
-            Add your first table
+            {t.qrc_addFirstTable}
           </Button>
         </div>
       ) : (
@@ -695,6 +702,7 @@ interface CreateCampaignDialogProps {
 }
 
 function CreateCampaignDialog({ open, onOpenChange, onCreate }: CreateCampaignDialogProps) {
+  const t = useT();
   const [name, setName] = useState("");
   const [expires, setExpires] = useState("");
 
@@ -718,14 +726,14 @@ function CreateCampaignDialog({ open, onOpenChange, onCreate }: CreateCampaignDi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create campaign</DialogTitle>
+          <DialogTitle>{t.qrc_createCampaign}</DialogTitle>
           <DialogDescription>
-            Generate a campaign QR code to track promotional traffic.
+            {t.qrc_createCampaignDesc}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="camp-name">Campaign name</Label>
+            <Label htmlFor="camp-name">{t.qrc_campaignName}</Label>
             <Input
               id="camp-name"
               value={name}
@@ -736,7 +744,7 @@ function CreateCampaignDialog({ open, onOpenChange, onCreate }: CreateCampaignDi
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="camp-expires">Expiry date</Label>
+            <Label htmlFor="camp-expires">{t.qrc_expiryDate}</Label>
             <Input
               id="camp-expires"
               type="date"
@@ -749,9 +757,9 @@ function CreateCampaignDialog({ open, onOpenChange, onCreate }: CreateCampaignDi
             <DialogClose
               render={<Button variant="outline" type="button" />}
             >
-              Cancel
+              {t.dashCancel}
             </DialogClose>
-            <Button type="submit">Create campaign</Button>
+            <Button type="submit">{t.qrc_createCampaign}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -769,18 +777,19 @@ interface DeleteCampaignDialogProps {
 }
 
 function DeleteCampaignDialog({ campaignId, campaignName, onClose, onConfirm }: DeleteCampaignDialogProps) {
+  const t = useT();
   return (
     <Dialog open={!!campaignId} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete campaign?</DialogTitle>
+          <DialogTitle>{t.qrc_deleteCampaign}</DialogTitle>
           <DialogDescription>
-            Delete &ldquo;{campaignName}&rdquo;? This action cannot be undone.
+            &ldquo;{campaignName}&rdquo;? {t.mnu_cannotUndo}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>
-            Cancel
+            {t.dashCancel}
           </DialogClose>
           <Button
             variant="destructive"
@@ -791,7 +800,7 @@ function DeleteCampaignDialog({ campaignId, campaignName, onClose, onConfirm }: 
               }
             }}
           >
-            Delete
+            {t.dashDelete}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -802,6 +811,7 @@ function DeleteCampaignDialog({ campaignId, campaignName, onClose, onConfirm }: 
 // ─── CampaignsTab ─────────────────────────────────────────────────────────────
 
 function CampaignsTab() {
+  const t = useT();
   const [campaigns, setCampaigns] = useState<Campaign[]>(INITIAL_CAMPAIGNS);
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteCampaignId, setDeleteCampaignId] = useState<string | null>(null);
@@ -853,19 +863,19 @@ function CampaignsTab() {
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Total Scans</p>
+          <p className="text-xs text-muted-foreground">{t.qrc_totalScans}</p>
           <p className="text-2xl font-bold tabular-nums mt-1">{totalScans.toLocaleString()}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Total Orders</p>
+          <p className="text-xs text-muted-foreground">{t.qrc_totalOrders}</p>
           <p className="text-2xl font-bold tabular-nums mt-1">{totalOrders.toLocaleString()}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Avg Conversion</p>
+          <p className="text-xs text-muted-foreground">{t.qrc_avgConversion}</p>
           <p className="text-2xl font-bold tabular-nums mt-1">{avgConversion}%</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Total Revenue</p>
+          <p className="text-xs text-muted-foreground">{t.qrc_totalRevenue}</p>
           <p className="text-2xl font-bold tabular-nums mt-1">{formatPrice(totalRevenue)}</p>
         </div>
       </div>
@@ -874,7 +884,7 @@ function CampaignsTab() {
       <div className="flex items-center gap-2">
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className="size-4" />
-          Create campaign
+          {t.qrc_createCampaign}
         </Button>
       </div>
 
@@ -883,15 +893,15 @@ function CampaignsTab() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/50">
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">QR</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Code</th>
-              <th className="px-4 py-3 text-right font-medium text-muted-foreground">Scans</th>
-              <th className="px-4 py-3 text-right font-medium text-muted-foreground">Orders</th>
-              <th className="px-4 py-3 text-right font-medium text-muted-foreground">Revenue</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Expires</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-              <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t.qrc_colName}</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t.qrc_colQr}</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t.qrc_colCode}</th>
+              <th className="px-4 py-3 text-right font-medium text-muted-foreground">{t.qrc_colScans}</th>
+              <th className="px-4 py-3 text-right font-medium text-muted-foreground">{t.qrc_colOrders}</th>
+              <th className="px-4 py-3 text-right font-medium text-muted-foreground">{t.qrc_colRevenue}</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t.qrc_colExpires}</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">{t.qrc_colStatus}</th>
+              <th className="px-4 py-3 text-right font-medium text-muted-foreground">{t.qrc_colActions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -909,10 +919,10 @@ function CampaignsTab() {
         {campaigns.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
             <QrCode className="size-10 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">No campaigns yet</p>
+            <p className="text-sm text-muted-foreground">{t.qrc_noCampaigns}</p>
             <Button size="sm" onClick={() => setCreateOpen(true)}>
               <Plus className="size-4" />
-              Create your first campaign
+              {t.qrc_createFirstCampaign}
             </Button>
           </div>
         )}
@@ -943,6 +953,7 @@ interface CampaignRowProps {
 }
 
 function CampaignRow({ campaign, onToggleActive, onDelete }: CampaignRowProps) {
+  const t = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const campUrl = `${BASE_URL}?utm=${campaign.code}`;
   const isExpired = campaign.expires ? new Date(campaign.expires) < new Date() : false;
@@ -992,14 +1003,14 @@ function CampaignRow({ campaign, onToggleActive, onDelete }: CampaignRowProps) {
             variant="default"
             className="bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/20"
           >
-            Active
+            {t.qrc_badgeActive}
           </Badge>
         ) : (
-          <Badge variant="secondary">Inactive</Badge>
+          <Badge variant="secondary">{t.qrc_badgeInactive}</Badge>
         )}
         {isExpired && (
           <Badge variant="destructive" className="ml-1">
-            Expired
+            {t.qrc_badgeExpired}
           </Badge>
         )}
       </td>
@@ -1013,26 +1024,26 @@ function CampaignRow({ campaign, onToggleActive, onDelete }: CampaignRowProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>Campaign actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{t.qrc_campaignActions}</DropdownMenuLabel>
               <DropdownMenuItem onClick={handleDownloadQR}>
                 <Download className="size-4" />
-                Download QR
+                {t.qrc_downloadQr}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toast.info("Stats view coming soon")}>
+              <DropdownMenuItem onClick={() => toast.info(t.qrc_statsSoon)}>
                 <BarChart2 className="size-4" />
-                View stats
+                {t.qrc_viewStats}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onToggleActive(campaign.id)}>
                 {campaign.active ? (
                   <>
                     <ToggleLeft className="size-4" />
-                    Deactivate
+                    {t.qrc_deactivate}
                   </>
                 ) : (
                   <>
                     <ToggleRight className="size-4" />
-                    Activate
+                    {t.qrc_activate}
                   </>
                 )}
               </DropdownMenuItem>
@@ -1042,7 +1053,7 @@ function CampaignRow({ campaign, onToggleActive, onDelete }: CampaignRowProps) {
                 onClick={() => onDelete(campaign.id)}
               >
                 <Trash2 className="size-4" />
-                Delete
+                {t.dashDelete}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
@@ -1055,21 +1066,22 @@ function CampaignRow({ campaign, onToggleActive, onDelete }: CampaignRowProps) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function QRPage() {
+  const t = useT();
   return (
     <div className="max-w-6xl space-y-6">
       {/* Page heading */}
       <div>
-        <h1 className="text-xl font-bold tracking-tight">QR Codes</h1>
+        <h1 className="text-xl font-bold tracking-tight">{t.qrc_pageTitle}</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Manage and customise all QR codes for your restaurant.
+          {t.qrc_pageSubtitle}
         </p>
       </div>
 
       <Tabs defaultValue="master">
         <TabsList>
-          <TabsTrigger value="master">Master QR</TabsTrigger>
-          <TabsTrigger value="tables">Table QRs</TabsTrigger>
-          <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          <TabsTrigger value="master">{t.qrc_tabMaster}</TabsTrigger>
+          <TabsTrigger value="tables">{t.qrc_tabTables}</TabsTrigger>
+          <TabsTrigger value="campaigns">{t.qrc_tabCampaigns}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="master" className="pt-6">

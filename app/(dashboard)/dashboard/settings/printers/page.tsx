@@ -27,6 +27,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -142,18 +143,12 @@ interface StationFormState {
 }
 
 function StationSheet({
-  open,
-  onOpenChange,
-  initial,
-  onSave,
-  mode,
+  open, onOpenChange, initial, onSave, mode,
 }: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  initial: StationFormState | null;
-  onSave: (data: StationFormState) => void;
-  mode: "create" | "edit";
+  open: boolean; onOpenChange: (v: boolean) => void;
+  initial: StationFormState | null; onSave: (data: StationFormState) => void; mode: "create" | "edit";
 }) {
+  const t = useT();
   const blank: StationFormState = {
     name: "",
     type: "KDS Screen",
@@ -183,20 +178,13 @@ function StationSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader className="border-b border-border pb-4">
-          <SheetTitle>
-            {mode === "create" ? "Add Station" : "Edit Station"}
-          </SheetTitle>
-          <SheetDescription>
-            {mode === "create"
-              ? "Configure a new kitchen or bar station."
-              : "Update the settings for this station."}
-          </SheetDescription>
+          <SheetTitle>{mode === "create" ? t.prt_addStationTitle : t.prt_editStationTitle}</SheetTitle>
+          <SheetDescription>{mode === "create" ? t.prt_addStationDesc : t.prt_editStationDesc}</SheetDescription>
         </SheetHeader>
 
         <div className="flex flex-col gap-5 px-4 py-5">
-          {/* Name */}
           <div className="space-y-1.5">
-            <Label htmlFor="station-name">Station name</Label>
+            <Label htmlFor="station-name">{t.prt_stationName}</Label>
             <Input
               id="station-name"
               value={form.name}
@@ -205,9 +193,8 @@ function StationSheet({
             />
           </div>
 
-          {/* Type */}
           <div className="space-y-1.5">
-            <Label>Display / printer type</Label>
+            <Label>{t.prt_displayType}</Label>
             <Select
               value={form.type}
               onValueChange={(v) => setForm((p) => ({ ...p, type: v as StationType }))}
@@ -223,9 +210,8 @@ function StationSheet({
             </Select>
           </div>
 
-          {/* Color */}
           <div className="space-y-1.5">
-            <Label htmlFor="station-color">KDS display color</Label>
+            <Label htmlFor="station-color">{t.prt_displayColor}</Label>
             <div className="flex items-center gap-3">
               <input
                 id="station-color"
@@ -238,9 +224,8 @@ function StationSheet({
             </div>
           </div>
 
-          {/* IP address */}
           <div className="space-y-1.5">
-            <Label htmlFor="station-ip">IP address (network printer)</Label>
+            <Label htmlFor="station-ip">{t.prt_ipAddress}</Label>
             <Input
               id="station-ip"
               value={form.ip}
@@ -249,20 +234,14 @@ function StationSheet({
             />
           </div>
 
-          {/* Test print */}
           <div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => toast.info("Test print sent")}
-            >
-              Test print
+            <Button variant="outline" size="sm" onClick={() => toast.info(t.prt_toastTestPrint)}>
+              {t.prt_testPrint}
             </Button>
           </div>
 
-          {/* Items */}
           <div className="space-y-2">
-            <Label>Assigned menu items</Label>
+            <Label>{t.prt_assignedItems}</Label>
             <div className="rounded-lg border border-border bg-muted/30 divide-y divide-border max-h-60 overflow-y-auto">
               {ALL_MENU_ITEMS.map((item) => (
                 <label
@@ -283,20 +262,12 @@ function StationSheet({
         </div>
 
         <SheetFooter className="border-t border-border pt-4 flex-row gap-2 justify-end">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              if (!form.name.trim()) {
-                toast.error("Station name is required");
-                return;
-              }
-              onSave(form);
-              onOpenChange(false);
-            }}
-          >
-            {mode === "create" ? "Add station" : "Save changes"}
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.dashCancel}</Button>
+          <Button onClick={() => {
+            if (!form.name.trim()) { toast.error(t.prt_stationNameRequired); return; }
+            onSave(form); onOpenChange(false);
+          }}>
+            {mode === "create" ? t.prt_addStation : t.dashSave}
           </Button>
         </SheetFooter>
       </SheetContent>
@@ -307,6 +278,7 @@ function StationSheet({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function PrintersPage() {
+  const t = useT();
   const [stations, setStations] = useState<Station[]>(INITIAL_STATIONS);
   const [routing, setRouting] = useState<CategoryRouting[]>(INITIAL_ROUTING);
 
@@ -361,7 +333,7 @@ export default function PrintersPage() {
         enabled: true,
       };
       setStations((prev) => [...prev, newStation]);
-      toast.success(`Station "${data.name}" added`);
+      toast.success(`${t.prt_addStation}: "${data.name}"`);
     } else if (editingId) {
       setStations((prev) =>
         prev.map((s) =>
@@ -370,7 +342,7 @@ export default function PrintersPage() {
             : s
         )
       );
-      toast.success("Station updated");
+      toast.success(t.set_toastAllSaved);
     }
   }
 
@@ -387,7 +359,7 @@ export default function PrintersPage() {
   }
 
   function saveRouting() {
-    toast.success("Category routing saved");
+    toast.success(t.prt_toastRoutingSaved);
   }
 
   return (
@@ -395,23 +367,17 @@ export default function PrintersPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">
-            Printer &amp; Station Routing
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Configure where each item type is sent for preparation
-          </p>
+          <h1 className="text-xl font-bold tracking-tight">{t.prt_pageTitle}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t.prt_pageSubtitle}</p>
         </div>
         <Button onClick={openCreate} className="gap-2 flex-shrink-0">
-          <Plus className="h-4 w-4" />
-          Add station
+          <Plus className="h-4 w-4" />{t.prt_addStation}
         </Button>
       </div>
 
-      {/* ── Section 1: Stations list ─────────────────────────────────────── */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Stations
+          {t.prt_stationsSection}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {stations.map((station) => {
@@ -453,19 +419,12 @@ export default function PrintersPage() {
                   />
                 </div>
 
-                {/* Item count + edit */}
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">
-                    {station.items.length} item{station.items.length !== 1 ? "s" : ""} assigned
+                    {station.items.length} {station.items.length !== 1 ? t.prt_itemsAssigned : t.prt_itemAssigned}
                   </span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => openEdit(station)}
-                    className="h-7 text-xs gap-1.5"
-                  >
-                    <Pencil className="h-3 w-3" />
-                    Edit
+                  <Button size="sm" variant="outline" onClick={() => openEdit(station)} className="h-7 text-xs gap-1.5">
+                    <Pencil className="h-3 w-3" />{t.dashEdit}
                   </Button>
                 </div>
 
@@ -493,15 +452,12 @@ export default function PrintersPage() {
         </div>
       </section>
 
-      {/* ── Section 2: Category routing ──────────────────────────────────── */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Category Routing Rules
-        </h2>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{t.prt_routingSection}</h2>
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="hidden sm:grid grid-cols-2 gap-4 px-4 py-2.5 border-b border-border text-xs font-medium text-muted-foreground">
-            <span>Menu category</span>
-            <span>Default station</span>
+            <span>{t.prt_colMenuCategory}</span>
+            <span>{t.prt_colDefaultStation}</span>
           </div>
           {routing.map((row, idx) => (
             <div
@@ -517,10 +473,10 @@ export default function PrintersPage() {
                 onValueChange={(v) => updateRouting(row.category, v as string)}
               >
                 <SelectTrigger className="w-full sm:w-52 h-8">
-                  <SelectValue placeholder="No preference" />
+                  <SelectValue placeholder="{t.prt_noPreference}" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No preference</SelectItem>
+                  <SelectItem value="">{t.prt_noPreference}</SelectItem>
                   {stations.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.name}
@@ -531,35 +487,24 @@ export default function PrintersPage() {
             </div>
           ))}
           <div className="flex justify-end px-4 py-3 border-t border-border">
-            <Button onClick={saveRouting} size="sm">
-              Save routing
-            </Button>
+            <Button onClick={saveRouting} size="sm">{t.prt_saveRouting}</Button>
           </div>
         </div>
       </section>
 
-      {/* ── Section 3: Printer network ───────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            Printer Network
-          </h2>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => toast.info("Scanning network...")}
-          >
-            <Wifi className="h-4 w-4" />
-            Discover printers
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{t.prt_networkSection}</h2>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info(t.prt_toastScanning)}>
+            <Wifi className="h-4 w-4" />{t.prt_discoverPrinters}
           </Button>
         </div>
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="hidden sm:grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-4 py-2.5 border-b border-border text-xs font-medium text-muted-foreground">
-            <span>Name</span>
-            <span>IP address</span>
-            <span>Type</span>
-            <span>Status</span>
+            <span>{t.prt_colName}</span>
+            <span>{t.prt_colIp}</span>
+            <span>{t.prt_colType}</span>
+            <span>{t.prt_colStatus}</span>
             <span></span>
           </div>
           {DISCOVERED_PRINTERS.map((printer, idx) => (
@@ -573,29 +518,12 @@ export default function PrintersPage() {
               <span className="text-sm font-medium">{printer.name}</span>
               <span className="text-sm font-mono text-muted-foreground">{printer.ip}</span>
               <span className="text-xs text-muted-foreground">{printer.type}</span>
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1.5 text-xs font-medium",
-                  printer.online ? "text-green-600 dark:text-green-400" : "text-red-500"
-                )}
-              >
-                <span
-                  className={cn(
-                    "h-1.5 w-1.5 rounded-full flex-shrink-0",
-                    printer.online ? "bg-green-500" : "bg-red-500"
-                  )}
-                />
-                {printer.online ? "Online" : "Offline"}
+              <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", printer.online ? "text-green-600 dark:text-green-400" : "text-red-500")}>
+                <span className={cn("h-1.5 w-1.5 rounded-full flex-shrink-0", printer.online ? "bg-green-500" : "bg-red-500")} />
+                {printer.online ? t.prt_online : t.prt_offline}
               </span>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-xs"
-                onClick={() =>
-                  toast.info(`Test print sent to ${printer.name}`)
-                }
-              >
-                Test
+              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => toast.info(`${t.prt_testPrint}: ${printer.name}`)}>
+                {t.prt_test}
               </Button>
             </div>
           ))}
