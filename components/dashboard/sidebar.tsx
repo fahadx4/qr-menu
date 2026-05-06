@@ -7,6 +7,7 @@ import {
   LayoutGrid, Users, UserCheck, BarChart2, MessageCircle, Settings,
   CreditCard, Building2, CalendarClock, ChevronLeft, ChevronRight, X,
   Package, Truck, Gift, Megaphone, Plug, Globe2, Languages, Printer, Globe, Inbox,
+  UserRound, Bike, Monitor,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDashboardStore } from "@/store/dashboard";
@@ -33,9 +34,11 @@ function getNav(t: ReturnType<typeof useT>): NavGroup[] {
     {
       label: null,
       items: [
-        { label: t.navOverview, href: "/dashboard",          icon: LayoutDashboard, roles: ["owner", "manager"] },
-        { label: t.navOrders,   href: "/dashboard/orders",   icon: ShoppingBag,     roles: ["owner", "manager", "cashier", "waiter", "read_only"] },
-        { label: t.navKitchen,  href: "/dashboard/kds",      icon: ChefHat,         roles: ["owner", "manager", "kitchen"] },
+        { label: t.navOverview, href: "/dashboard",           icon: LayoutDashboard, roles: ["owner", "manager"] },
+        { label: t.navOrders,   href: "/dashboard/orders",    icon: ShoppingBag,     roles: ["owner", "manager", "cashier", "waiter", "read_only"] },
+        { label: t.navKitchen,  href: "/dashboard/kds",       icon: ChefHat,         roles: ["owner", "manager", "kitchen"] },
+        { label: t.wtr_pageTitle, href: "/dashboard/waiter",  icon: UserRound,       roles: ["owner", "manager", "waiter"] },
+        { label: t.pos_pageTitle, href: "/dashboard/cashier", icon: Monitor,         roles: ["owner", "manager", "cashier"] },
       ],
     },
     {
@@ -48,6 +51,7 @@ function getNav(t: ReturnType<typeof useT>): NavGroup[] {
         { label: t.navReservations, href: "/dashboard/reservations",    icon: CalendarClock,   roles: ["owner", "manager", "waiter"] },
         { label: t.navInventory,    href: "/dashboard/inventory",       icon: Package,         roles: ["owner", "manager"] },
         { label: t.navDelivery,     href: "/dashboard/delivery",        icon: Truck,           roles: ["owner", "manager"] },
+        { label: t.rdr_pageTitle,   href: "/dashboard/riders",          icon: Bike,            roles: ["owner", "manager"] },
       ],
     },
     {

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import {
   Plus, Trash2, Loader2, GripVertical, ChevronDown, ChevronUp,
   Package, Scale, Layers, DollarSign, Image as ImageIcon,
-  Check, Info,
+  Check, Info, Languages,
 } from "lucide-react";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter,
@@ -23,6 +23,7 @@ import {
   Select, SelectTrigger, SelectContent, SelectItem, SelectValue,
 } from "@/components/ui/select";
 import { cn, formatPrice, generateId } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 import type {
   Item, Category, ItemTag, Allergen, DietaryTag,
   ItemType, WeightUnit, ComboComponent, ModifierGroup, ModifierOption,
@@ -182,6 +183,13 @@ function OptionRow({
         onChange={(e) => onChange({ ...option, name: e.target.value })}
         className="h-8 flex-1 text-sm"
       />
+      <Input
+        placeholder="بالعربية"
+        value={option.name_ar ?? ""}
+        onChange={(e) => onChange({ ...option, name_ar: e.target.value })}
+        className="h-8 w-24 text-sm text-right text-muted-foreground"
+        dir="rtl"
+      />
       <div className="flex items-center gap-1 w-28 flex-shrink-0">
         <Select
           value={option.price_delta >= 0 ? "add" : "sub"}
@@ -261,6 +269,13 @@ function ModifierGroupCard({
           value={group.name}
           onChange={(e) => onChange({ ...group, name: e.target.value })}
           className="h-7 flex-1 text-sm bg-transparent border-0 shadow-none px-0 focus-visible:ring-0"
+        />
+        <Input
+          placeholder="الاسم بالعربية"
+          value={group.name_ar ?? ""}
+          onChange={(e) => onChange({ ...group, name_ar: e.target.value })}
+          className="h-7 w-32 text-sm text-right bg-transparent border-0 border-l rounded-none shadow-none px-2 focus-visible:ring-0 text-muted-foreground"
+          dir="rtl"
         />
         <div className="flex items-center gap-3 flex-shrink-0">
           <label className="flex items-center gap-1.5 text-xs cursor-pointer">
@@ -422,6 +437,7 @@ export function MenuItemSheet({
   onDelete,
 }: MenuItemSheetProps) {
   const uid = useId();
+  const t = useT();
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
 
@@ -476,6 +492,10 @@ export function MenuItemSheet({
   // Image slots
   const [images, setImages] = useState<(string | null)[]>([null, null, null, null, null]);
 
+  // Arabic translations
+  const [nameAr, setNameAr]               = useState("");
+  const [descriptionAr, setDescriptionAr] = useState("");
+
   // Reset form when item changes
   useEffect(() => {
     if (!open) return;
@@ -505,6 +525,8 @@ export function MenuItemSheet({
       setAllergens(item.allergens);
       setDietary(item.dietary);
       setImages([...item.image_urls.slice(0, 5), ...Array(5).fill(null)].slice(0, 5) as (string | null)[]);
+      setNameAr(item.translations?.ar?.name ?? "");
+      setDescriptionAr(item.translations?.ar?.description ?? "");
       setVariants(item.variants ?? []);
       setTaxCategory(item.tax_category ?? "standard");
       setKitchenStation(item.kitchen_station ?? "default");
@@ -522,6 +544,7 @@ export function MenuItemSheet({
       setImages([null, null, null, null, null]);
       setVariants([]); setTaxCategory("standard"); setKitchenStation("default");
       setSku(""); setAgeRestricted(false); setDiscountEligible(true); setLoyaltyOverride("");
+      setNameAr(""); setDescriptionAr("");
     }
   }, [open, item, defaultCategoryId, categories]);
 
@@ -579,6 +602,10 @@ export function MenuItemSheet({
       age_restricted: ageRestricted || undefined,
       discount_eligible: discountEligible ? undefined : false,
       loyalty_points_override: loyaltyOverride ? parseInt(loyaltyOverride) : undefined,
+      translations: (nameAr || descriptionAr) ? {
+        ...item?.translations,
+        ar: { name: nameAr || name.trim(), description: descriptionAr || undefined },
+      } : item?.translations,
     };
 
     onSave(saved);
@@ -641,8 +668,9 @@ export function MenuItemSheet({
           onValueChange={setActiveTab}
           className="flex flex-col flex-1 min-h-0"
         >
-          <TabsList className="flex-shrink-0 mx-5 mt-3 mb-0 h-9 bg-muted rounded-lg p-1 grid grid-cols-6">
+          <TabsList className="flex-shrink-0 mx-5 mt-3 mb-0 h-9 bg-muted rounded-lg p-1 grid grid-cols-7">
             <TabsTrigger value="details"      className="text-xs rounded-md">Details</TabsTrigger>
+            <TabsTrigger value="bilingual"    className="text-xs rounded-md flex items-center gap-1"><Languages className="h-3 w-3" />AR</TabsTrigger>
             <TabsTrigger value="pricing"      className="text-xs rounded-md">Pricing</TabsTrigger>
             <TabsTrigger value="variants"     className="text-xs rounded-md">Variants</TabsTrigger>
             <TabsTrigger value="attributes"   className="text-xs rounded-md">Dietary</TabsTrigger>
@@ -736,6 +764,54 @@ export function MenuItemSheet({
                   );
                 })}
               </div>
+            </div>
+          </TabsContent>
+
+          {/* ── BILINGUAL TAB ── */}
+          <TabsContent value="bilingual" className="flex-1 overflow-y-auto px-5 pt-4 pb-24 space-y-5 mt-0">
+            <div className="flex items-start gap-2 rounded-lg bg-muted/50 px-3 py-2.5">
+              <Languages className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground">{t.bil_bilingualHint}</p>
+            </div>
+
+            <FieldRow label={t.bil_arabicName}>
+              <Input
+                placeholder={t.bil_arabicNamePlaceholder}
+                value={nameAr}
+                onChange={(e) => setNameAr(e.target.value)}
+                className="h-10 text-right font-arabic"
+                dir="rtl"
+              />
+            </FieldRow>
+
+            <FieldRow label={t.bil_arabicDesc}>
+              <Textarea
+                placeholder={t.bil_arabicDescPlaceholder}
+                value={descriptionAr}
+                onChange={(e) => setDescriptionAr(e.target.value)}
+                rows={4}
+                className="resize-none text-right font-arabic"
+                dir="rtl"
+              />
+            </FieldRow>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <SectionTitle>Preview</SectionTitle>
+              {(nameAr || descriptionAr) ? (
+                <div className="rounded-xl border border-border bg-card p-4 space-y-1 text-right" dir="rtl">
+                  <p className="font-semibold text-base">{nameAr || name}</p>
+                  {descriptionAr && <p className="text-sm text-muted-foreground">{descriptionAr}</p>}
+                  {!nameAr && !descriptionAr && (
+                    <p className="text-xs text-muted-foreground italic text-left" dir="ltr">No Arabic content yet.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-xl border-2 border-dashed border-muted-foreground/20 p-4 text-center">
+                  <p className="text-xs text-muted-foreground">Fill in the fields above to see a preview.</p>
+                </div>
+              )}
             </div>
           </TabsContent>
 

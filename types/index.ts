@@ -59,7 +59,9 @@ export interface Branch {
   id: string;
   tenant_id: string;
   name: string;
+  name_ar?: string;
   address: string;
+  address_ar?: string;
   phone?: string;
   lat?: number;
   lng?: number;
@@ -204,6 +206,7 @@ export interface ModifierGroup {
   id: string;
   item_id: string;
   name: string;
+  name_ar?: string;
   is_required: boolean;
   min_selections: number;
   max_selections?: number;
@@ -215,6 +218,7 @@ export interface ModifierOption {
   id: string;
   group_id: string;
   name: string;
+  name_ar?: string;
   price_delta: number;
   is_default: boolean;
   is_available: boolean;
@@ -228,7 +232,32 @@ export interface RestaurantTable {
   number: string;
   capacity?: number;
   qr_code_id: string;
-  status: "free" | "occupied" | "ready" | "bill_requested" | "aging";
+  status: "free" | "occupied" | "ready" | "bill_requested" | "aging" | "reserved" | "dirty" | "blocked";
+  section?: "indoor" | "outdoor" | "vip" | "bar";
+  waiter_id?: string;
+}
+
+export type RiderStatus = "online" | "offline" | "on_delivery";
+export type VehicleType = "motorcycle" | "bicycle" | "car";
+
+export interface Rider {
+  id: string;
+  tenant_id: string;
+  name: string;
+  name_ar?: string;
+  phone: string;
+  vehicle: VehicleType;
+  photo_url?: string;
+  status: RiderStatus;
+  is_available: boolean;
+  current_order_id?: string;
+  total_deliveries: number;
+  avg_delivery_time?: number;
+  rating?: number;
+  earnings_today: number;
+  earnings_week: number;
+  cash_collected: number;
+  created_at: string;
 }
 
 export interface Order {
@@ -291,8 +320,10 @@ export interface StaffMember {
   tenant_id: string;
   user_id: string;
   name: string;
+  name_ar?: string;
   email: string;
   role: UserRole;
+  pin?: string;
   branch_scope?: string[];
   status: "active" | "pending" | "removed";
   last_login?: string;

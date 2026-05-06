@@ -67,6 +67,12 @@ const STATUS_COLORS: Record<TableStatus, string> = {
     "bg-yellow-100 border-yellow-300 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-700 dark:text-yellow-300",
   aging:
     "bg-red-100 border-red-300 text-red-800 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300 animate-pulse",
+  reserved:
+    "bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900/30 dark:border-purple-700 dark:text-purple-300",
+  dirty:
+    "bg-orange-100 border-orange-300 text-orange-800 dark:bg-orange-900/30 dark:border-orange-700 dark:text-orange-300",
+  blocked:
+    "bg-zinc-200 border-zinc-400 text-zinc-600 dark:bg-zinc-800 dark:border-zinc-600 dark:text-zinc-400",
 };
 
 // STATUS_LABELS is now built from translations inside components that call useT()
@@ -121,6 +127,9 @@ function StatusLegend() {
     { status: "bill_requested", label: t.tbl_statusBillRequested },
     { status: "ready",          label: t.tbl_statusReadyServed },
     { status: "aging",          label: t.tbl_statusAging },
+    { status: "reserved",       label: "Reserved" },
+    { status: "dirty",          label: "Dirty" },
+    { status: "blocked",        label: "Blocked" },
   ];
 
   return (
@@ -155,6 +164,7 @@ function TableCard({
   const STATUS_LABELS: Record<TableStatus, string> = {
     free: t.tbl_statusFree, occupied: t.tbl_statusOccupied, ready: t.tbl_statusReady,
     bill_requested: t.tbl_statusBillRequested, aging: t.tbl_statusAging,
+    reserved: "Reserved", dirty: "Dirty", blocked: "Blocked",
   };
   return (
     <button
@@ -391,6 +401,7 @@ function TableDetailSheet({
   const STATUS_LABELS: Record<TableStatus, string> = {
     free: t.tbl_statusFree, occupied: t.tbl_statusOccupied, ready: t.tbl_statusReady,
     bill_requested: t.tbl_statusBillRequested, aging: t.tbl_statusAging,
+    reserved: "Reserved", dirty: "Dirty", blocked: "Blocked",
   };
   if (!table) return null;
 
@@ -569,6 +580,7 @@ export default function TablesPage() {
   const STATUS_LABELS: Record<TableStatus, string> = {
     free: t.tbl_statusFree, occupied: t.tbl_statusOccupied, ready: t.tbl_statusReady,
     bill_requested: t.tbl_statusBillRequested, aging: t.tbl_statusAging,
+    reserved: "Reserved", dirty: "Dirty", blocked: "Blocked",
   };
   const [tables, setTables] = useState<RestaurantTable[]>(INITIAL_TABLES);
   const [selectedBranchId, setSelectedBranchId] = useState<string>("b1");
